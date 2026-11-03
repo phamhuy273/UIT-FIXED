@@ -91,42 +91,91 @@ UIT-FIXED (Monorepo)
 
 ---
 
-## 5. Hướng dẫn Khởi chạy Nhanh (Quick Start)
+## 5. Công cụ và Phiên bản Sử dụng (Tools & Environment Versions)
 
-### 1. Chuẩn bị biến môi trường
-Tạo file .env từ file mẫu và bổ sung thông tin Cloudinary:
+| Hạng mục | Công nghệ / Công cụ | Phiên bản | Ghi chú |
+| :--- | :--- | :--- | :--- |
+| **Runtime Môi trường** | **Node.js** | `>= 20.x` (LTS) / `v24.x` | Khuyến nghị Node.js 20 LTS trở lên (Container dùng node:20-alpine) |
+| **Trình quản lý gói** | **npm** | `>= 10.x` / `11.x` | Sử dụng `npm.cmd` trên Windows PowerShell |
+| **Hạ tầng Container** | **Docker & Docker Compose** | `Docker 28.x`, `Compose v2.x` | Đóng gói toàn bộ PostgreSQL, Backend, Frontend |
+| **Cơ sở dữ liệu** | **PostgreSQL** | `16-alpine` | Chạy container hóa với volume lưu trữ độc lập |
+| **Công cụ ORM** | **Prisma ORM** | `^6.4.1` | Quản trị schema, migration và type-safe query |
+| **Backend Framework** | **NestJS** | `^12.0.1` | NodeNext ESM, Kiến trúc module phân tầng chuẩn Enterprise |
+| **Upload & Lưu trữ Media** | **Cloudinary SDK & Multer** | `cloudinary ^2.x`, `streamifier` | Xử lý Buffer Streaming trực tiếp từ RAM |
+| **Frontend Framework** | **ReactJS** | `^19.3.1` | Kiến trúc Feature-Sliced |
+| **Frontend Build Tool** | **Vite** | `^8.3.5` | Bundler tốc độ cao, hỗ trợ HMR |
+| **Ngôn ngữ phát triển** | **TypeScript** | `>= 6.0` (Backend), `~7.0` (Frontend) | Type-safe toàn diện từ DB sang Client |
+| **State Management** | **TanStack Query & Zustand** | Query `^5.66.0`, Zustand `^5.0.3` | Cache server state và quản lý auth store |
+| **HTTP Client** | **Axios** | `^1.7.9` | Interceptor tự động gắn JWT và xử lý lỗi |
+| **Web Server Production** | **Nginx** | `alpine` | Phục vụ static web và reverse proxy cho React |
+| **Hệ thống Quản lý Mã nguồn**| **Git & GitHub** | `main branch` | Điều phối mã nguồn theo quy chuẩn Scrum |
+
+---
+
+## 6. Hướng dẫn Cài đặt & Khởi chạy (Quick Start)
+
+### 1. Yêu cầu Tiên quyết (Prerequisites)
+- Đã cài đặt **Git**
+- Đã cài đặt **Node.js >= 20.x LTS**
+- Đã cài đặt **Docker & Docker Desktop** (khuyên dùng)
+
+### 2. Tải mã nguồn & Cấu hình môi trường
 ```bash
+# 1. Clone repository về máy
+git clone https://github.com/phamhuy273/UIT-FIXED.git
+cd UIT-FIXED
+
+# 2. Tạo file cấu hình môi trường từ mẫu
 cp .env.example .env
 ```
-Cập nhật các khóa sau trong file .env:
+Mở file `.env` và điền thông tin tài khoản Cloudinary của bạn:
 ```env
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 ```
 
-### 2. Khởi động toàn bộ bằng Docker (Khuyên dùng)
+### 3. Cách 1: Khởi chạy nhanh bằng Docker (Khuyên dùng)
+Chỉ với 1 câu lệnh để chạy toàn bộ PostgreSQL, Backend và Frontend trong môi trường cách ly:
 ```bash
 docker compose up --build
 ```
-Truy cập hệ thống:
+Sau khi các container khởi động, đồng bộ schema vào PostgreSQL:
+```bash
+docker compose exec backend npx prisma db push
+```
 - **Giao diện Web (Frontend):** http://localhost:3000
 - **Giao diện API Docs / Endpoint:** http://localhost:5000/api/v1
 - **Cơ sở dữ liệu PostgreSQL:** localhost:5432
 
-### 3. Chạy từng phần ở môi trường Local Development
+### 4. Cách 2: Chạy trên máy cục bộ (Local Development)
 
-#### Chạy Backend:
+#### Bước 4.1: Khởi động cơ sở dữ liệu PostgreSQL (qua Docker)
+```bash
+docker compose up -d postgres
+```
+
+#### Bước 4.2: Cài đặt và khởi chạy Backend (NestJS)
 ```bash
 cd backend
 npm.cmd install
+
+# Tạo Prisma Client và đồng bộ bảng vào PostgreSQL
 npx.cmd prisma generate
+npx.cmd prisma db push
+
+# Chạy server ở chế độ Development (Watch mode)
 npm.cmd run start:dev
 ```
 
-#### Chạy Frontend:
+#### Bước 4.3: Cài đặt và khởi chạy Frontend (ReactJS)
+Mở một cửa sổ Terminal mới:
 ```bash
 cd frontend
 npm.cmd install
+
+# Chạy server giao diện
 npm.cmd run dev
 ```
+
+*Lưu ý trên Windows PowerShell: Nếu gặp lỗi chặn chạy script (`ExecutionPolicy`), hãy sử dụng lệnh có đuôi `.cmd` (ví dụ `npm.cmd`, `npx.cmd`).*
