@@ -1,0 +1,43 @@
+// Prisma schema definition for PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  fullName  String?  @map("full_name")
+  role      Role     @default(USER)
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  media Media[]
+
+  @@map("users")
+}
+
+model Media {
+  id        String   @id @default(uuid())
+  publicId  String   @unique @map("public_id")
+  url       String
+  format    String?
+  bytes     Int?
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("media")
+}
