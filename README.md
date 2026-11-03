@@ -70,6 +70,10 @@ UIT-FIXED (Monorepo)
 ├── docker-compose.yml          # Điều phối 3 container: postgres, backend, frontend
 ├── .env.example / .env         # Cấu hình biến môi trường toàn cục
 │
+├── doc/                        # Tài liệu dự án
+│   ├── uc/                     # Use Cases
+│   └── diagram/                # Diagrams
+│
 ├── backend/                    # NestJS API (NodeNext + Modular Clean Architecture)
 │   ├── Dockerfile              # Multi-stage build
 │   ├── prisma/schema.prisma    # PostgreSQL Schema (User, Ticket, Media, Comment, SLA)
@@ -179,3 +183,49 @@ npm.cmd run dev
 ```
 
 *Lưu ý trên Windows PowerShell: Nếu gặp lỗi chặn chạy script (`ExecutionPolicy`), hãy sử dụng lệnh có đuôi `.cmd` (ví dụ `npm.cmd`, `npx.cmd`).*
+
+---
+
+## 7. Quy trình Làm việc với Git & GitHub (GitHub Workflow)
+
+Để đảm bảo chất lượng mã nguồn và phối hợp hiệu quả giữa các thành viên nhóm AURA FAMI theo mô hình Scrum, dự án áp dụng quy trình Git Workflow chuẩn hóa như sau:
+
+### 1. Chiến lược Phân nhánh (Branching Strategy)
+- **`main`**: Nhánh ổn định, chứa mã nguồn sẵn sàng triển khai (Production/Release). Chỉ merge từ `develop` khi kết thúc Sprint Review.
+- **`develop`**: Nhánh tích hợp mã nguồn chính trong suốt quá trình phát triển của Sprint.
+- **`feature/<ten-tinh-nang>`**: Nhánh phát triển tính năng mới của từng thành viên (tách từ `develop`).
+  - Ví dụ: `feature/report-incident-form`, `feature/auth-jwt`, `feature/media-upload`
+- **`bugfix/<ten-loi>`**: Nhánh sửa lỗi phát hiện trong quá trình kiểm thử nội bộ Sprint.
+- **`hotfix/<ten-loi>`**: Nhánh xử lý sự cố khẩn cấp trực tiếp trên `main`.
+
+### 2. Quy ước Thông điệp Commit (Conventional Commits)
+Cấu trúc chuẩn: `<type>(<scope>): <mo ta ngan gon>`
+- **`feat`**: Phát triển tính năng mới (Ví dụ: `feat(media): implement buffer streaming upload to cloudinary`).
+- **`fix`**: Sửa lỗi trong code (Ví dụ: `fix(auth): handle token expiration correctly`).
+- **`docs`**: Cập nhật tài liệu, README (Ví dụ: `docs(readme): add github workflow`).
+- **`refactor`**: Tái cấu trúc mã nguồn không làm thay đổi logic (Ví dụ: `refactor(prisma): optimize database queries`).
+- **`chore`**: Cấu hình công cụ, dependencies, docker (Ví dụ: `chore(docker): update node alpine base image`).
+
+### 3. Quy trình Đóng góp Mã nguồn qua Pull Request (PR)
+1. **Cập nhật mã nguồn mới nhất:**
+   ```bash
+   git checkout develop
+   git pull origin develop
+   ```
+2. **Tạo nhánh làm việc mới cho tính năng:**
+   ```bash
+   git checkout -b feature/ten-tinh-nang
+   ```
+3. **Commit mã nguồn theo quy ước:**
+   ```bash
+   git add .
+   git commit -m "feat(scope): mo ta cong viec da lam"
+   ```
+4. **Đẩy nhánh lên GitHub:**
+   ```bash
+   git push origin feature/ten-tinh-nang
+   ```
+5. **Mở Pull Request trên GitHub:**
+   - Chọn Base branch: `develop` <- Compare branch: `feature/ten-tinh-nang`.
+   - Điền mô tả chi tiết nội dung thay đổi, gắn nhãn (Label) tương ứng với Sprint Backlog Item.
+   - Yêu cầu ít nhất 1 thành viên trong nhóm (Peer Review) duyệt và approve trước khi tiến hành merge vào `develop`.
