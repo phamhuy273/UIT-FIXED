@@ -14,9 +14,9 @@ export function App() {
   return (
     <div style={{ maxWidth: '900px', margin: '40px auto', fontFamily: 'system-ui, sans-serif', padding: '0 20px' }}>
       <header style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '20px', marginBottom: '30px' }}>
-        <h1 style={{ color: '#0f172a', margin: '0 0 8px 0' }}>Enterprise Fullstack Architecture</h1>
+        <h1 style={{ color: '#0f172a', margin: '0 0 8px 0' }}>UIT-FIXED 🛠️</h1>
         <p style={{ color: '#64748b', margin: 0 }}>
-          NestJS • ReactJS • PostgreSQL (Prisma) • Docker Compose • Cloudinary Buffer Streaming
+          Hệ Thống Quản Lý Vòng Đời Sự Cố (Ticketing System) Nội Bộ Dành Riêng Cho Trường Học
         </p>
       </header>
 
