@@ -14,9 +14,12 @@ export function App() {
   return (
     <div style={{ maxWidth: '900px', margin: '40px auto', fontFamily: 'system-ui, sans-serif', padding: '0 20px' }}>
       <header style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '20px', marginBottom: '30px' }}>
-        <h1 style={{ color: '#0f172a', margin: '0 0 8px 0' }}>UIT-FIXED 🛠️</h1>
-        <p style={{ color: '#64748b', margin: 0 }}>
+        <h1 style={{ color: '#0f172a', margin: '0 0 8px 0' }}>UIT-FIXED</h1>
+        <p style={{ color: '#64748b', margin: '0 0 4px 0' }}>
           Hệ Thống Quản Lý Vòng Đời Sự Cố (Ticketing System) Nội Bộ Dành Riêng Cho Trường Học
+        </p>
+        <p style={{ color: '#0284c7', margin: 0, fontSize: '0.9rem', fontWeight: 500 }}>
+          Nhóm thực hiện: AURA FAMI | Khóa học: AI-Driven Software Development with Scrum
         </p>
       </header>
 
