@@ -28,7 +28,8 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute allow={['ADMIN']} />,
     children: [{ element: <WorkspaceLayout scope="admin" />, children: [
-      { path: '/admin', element: <PendingQueueTable /> },
+      { path: '/admin', lazy: async () => ({ Component: (await import('@/features/admin/components/admin-dashboard')).AdminDashboard }) },
+      { path: '/admin/queue', element: <PendingQueueTable /> },
       { path: '/admin/account', element: <AccountDesk scope="admin" /> },
     ] }],
   },

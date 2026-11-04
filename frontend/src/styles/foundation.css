@@ -26,7 +26,9 @@ h3 { font-size: 17px; font-weight: 600; line-height: 1.4; }
 .app-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 40; width: var(--sidebar-width); display: flex; flex-direction: column; gap: 0; padding: var(--s-8) var(--s-5) var(--s-6); background: var(--navy-900); color: var(--nav-text); overflow-y: auto; }
 .brand { display: flex; align-items: center; gap: var(--s-3); color: var(--on-primary); text-decoration: none; padding: 0 var(--s-2); font-weight: 700; letter-spacing: -.02em; font-size: 18px; }
 .brand small { display: block; margin-top: var(--s-1); color: var(--navy-300); letter-spacing: .12em; font-size: 11px; font-weight: 500; }
-.brand-logo { display: block; flex-shrink: 0; object-fit: contain; border-radius: var(--radius-sm); }
+.brand-logo { display: block; flex-shrink: 0; width: var(--logo-size, 44px); height: var(--logo-size, 44px); border-radius: 50%; overflow: hidden; isolation: isolate; }
+/* The emblem circle in the 600px source is centred at (302, 315) with r≈263; shift it to the frame centre, then zoom so the square backdrop falls outside the clip. */
+.brand-logo img { display: block; width: 100%; height: 100%; transform: scale(1.17) translate(-.4%, -2.5%); }
 .sidebar-section-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; color: var(--navy-300); margin: var(--s-6) 14px var(--s-3); }
 .nav-item { display: flex; align-items: center; gap: var(--s-3); min-height: 44px; width: 100%; background: transparent; border: 0; color: var(--nav-text); padding: 8px 14px; margin-bottom: var(--s-2); border-radius: 10px; text-align: left; font-size: 14px; font-weight: 500; transition: background .15s, color .15s; }
 .nav-item > span { display: inline-grid; place-items: center; width: 18px; flex-shrink: 0; font-size: 18px; line-height: 20px; }

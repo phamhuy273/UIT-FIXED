@@ -4,8 +4,8 @@ import { AuthFrame } from '../components/auth-frame';
 export function SessionPending() {
   return (
     <AuthFrame title="Đang kiểm tra phiên">
-      <p className="auth-note">Đối chiếu token với tài khoản trên máy chủ.</p>
-      <div className="auth-loading-bar" />
+      <p role="status">Đang xác minh tài khoản của bạn, vui lòng chờ trong giây lát.</p>
+      <div className="auth-loading-bar" aria-hidden="true" />
     </AuthFrame>
   );
 }

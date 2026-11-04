@@ -11,7 +11,8 @@ export function WorkspaceLayout({ scope }: { scope: 'student' | 'admin' }) {
   const user = useAuthStore((state) => state.user);
   const clearSession = useAuthStore((state) => state.clearSession);
   const items = scope === 'admin' ? [
-    { id: '/admin', label: 'Hàng đợi chờ duyệt', icon: '▤' },
+    { id: '/admin', label: 'Tổng quan', icon: '▦' },
+    { id: '/admin/queue', label: 'Hàng đợi chờ duyệt', icon: '▤' },
     { id: '/admin/account', label: 'Tài khoản', icon: '○' },
   ] : [
     { id: '/', label: 'Báo cáo của tôi', icon: '▤' },

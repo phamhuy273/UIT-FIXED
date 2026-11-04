@@ -27,7 +27,8 @@ without replacing Dev 1's authoritative Prisma schema or initial migration.
 | `/` | STUDENT | Own report list |
 | `/reports/new` | STUDENT | Mobile-friendly report form |
 | `/account` | STUDENT | Existing account view |
-| `/admin` | ADMIN | Pending triage queue |
+| `/admin` | ADMIN | Dashboard: charts by building, room, category, urgency, trend (`GET /incident-reports/stats`) |
+| `/admin/queue` | ADMIN | Pending triage queue |
 | `/admin/account` | ADMIN | Existing account view |
 | `/staff` | TECH_STAFF | Existing staff placeholder/account view |
 | `/media` | Authenticated | Existing upload page |
