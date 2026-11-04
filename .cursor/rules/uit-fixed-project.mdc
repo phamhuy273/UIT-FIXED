@@ -1,0 +1,45 @@
+---
+description: Project-wide rules for UIT-FIXED development
+alwaysApply: true
+---
+
+# UIT-FIXED Project Rules
+
+## 1. Existing Technology Stack
+- Backend: NestJS, TypeScript, Prisma 6, PostgreSQL 16.
+- Frontend: React 19, Vite, TypeScript.
+- File storage: Cloudinary.
+- Preserve the existing project architecture and dependencies.
+- Do not replace existing technologies without explicit approval.
+
+## 2. Codebase First
+- Inspect existing code before creating or modifying files.
+- Reuse existing modules, utilities, services and dependencies.
+- Avoid duplicate implementations.
+- Follow the existing naming and coding conventions.
+
+## 3. Business Rules
+- Follow the uit-fixed-workflow Skill for all business logic.
+- Never invent unconfirmed UIT buildings, departments or workflows.
+- Enforce authorization on the backend.
+- Do not trust role, user ID or department ID supplied by the client without verification.
+
+## 4. Database
+- Follow the database-prisma Skill.
+- Preserve existing data and migration history.
+- Never run destructive database commands without explicit approval.
+
+## 5. Development Workflow
+- Understand the requested task before editing.
+- Inspect relevant files.
+- Present an implementation plan for tasks involving multiple files.
+- Keep changes scoped to the requested feature.
+- Add or update tests for changed business logic.
+- Run relevant tests and report their results.
+- Do not claim tests passed if they were not executed.
+
+## 6. Collaboration
+- Respect existing API contracts.
+- Avoid modifying unrelated files.
+- Do not introduce unnecessary dependencies.
+- Explain important design decisions and assumptions.
