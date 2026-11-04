@@ -30,3 +30,10 @@ Thumbs.db
 
 # Docker / DB data
 postgres_data/
+
+# Agent
+.agents/
+.cursor/
+
+backend/prisma/schema.proposal.prisma
+skills-lock.json

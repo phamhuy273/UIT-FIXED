@@ -3,6 +3,7 @@ import {
   Post,
   Get,
   Delete,
+  NotFoundException,
   Param,
   Query,
   UseInterceptors,
@@ -47,6 +48,10 @@ export class MediaController {
 
   @Delete(':id')
   async deleteMedia(@Param('id') id: string) {
-    return this.mediaService.deleteImage(id);
+    const mediaId = Number(id);
+    if (!Number.isInteger(mediaId) || mediaId < 1) {
+      throw new NotFoundException('Media not found.');
+    }
+    return this.mediaService.deleteImage(mediaId);
   }
 }

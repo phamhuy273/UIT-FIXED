@@ -1,4 +1,13 @@
 import axios from 'axios';
+import { clearAccessToken, readAccessToken } from '@/features/auth/lib/token-storage';
+
+type UnauthorizedHandler = () => void;
+
+let onUnauthorized: UnauthorizedHandler | null = null;
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler) {
+  onUnauthorized = handler;
+}
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1',
@@ -8,11 +17,10 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor: tự động đính kèm Bearer Token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('access_token');
-    if (token && config.headers) {
+    const token = readAccessToken();
+    if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -20,15 +28,16 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Response interceptor: xử lý bắt lỗi và token hết hạn
 apiClient.interceptors.response.use(
   (response) => response.data,
-  async (error) => {
-    const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      // Handle refresh token logic if needed
+  (error) => {
+    const status = error.response?.status;
+    const url = typeof error.config?.url === 'string' ? error.config.url : '';
+    const isCredentialAttempt = url.includes('/auth/login') || url.includes('/auth/register');
+    if (status === 401 && !isCredentialAttempt) {
+      clearAccessToken();
+      onUnauthorized?.();
     }
-    return Promise.reject(error.response?.data || error);
+    return Promise.reject(error.response?.data ?? error);
   },
 );

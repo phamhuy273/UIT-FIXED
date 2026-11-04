@@ -1,4 +1,6 @@
-// Prisma schema definition for PostgreSQL
+// Official Prisma 6 schema. Source: doc/database/uit-fixed.dbml.
+// Compound uniques on (parent id, id) exist so composite foreign keys have a target.
+// Partial unique indexes, CHECKs, and those foreign keys belong in a later SQL migration.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,34 +12,353 @@ datasource db {
 }
 
 enum Role {
-  USER
+  STUDENT
   ADMIN
+  TECH_STAFF
+}
+
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum IncidentStatus {
+  PENDING_ASSIGNMENT
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ReportHistoryAction {
+  CREATED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum IncidentHistoryAction {
+  CREATED
+  ASSIGNED
+  REASSIGNED
+  REJECTED
+  RESOLVED
+  REOPENED
+}
+
+enum IncidentUrgency {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  fullName  String?  @map("full_name")
-  role      Role     @default(USER)
-  avatarUrl String?  @map("avatar_url")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  password     String
+  fullName     String?  @map("full_name")
+  role         Role     @default(STUDENT)
+  avatarUrl    String?  @map("avatar_url")
+  departmentId Int?     @map("department_id")
+  isActive     Boolean  @default(false) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  media Media[]
+  department       Department? @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  activationTokens EmailActivationToken[]
+  uploadedMedia    Media[]
 
+  submittedReports IncidentReport[]
+  reportHistories  IncidentReportHistory[]
+
+  assignmentsMade     IncidentAssignment[] @relation("AssignmentAssignedBy")
+  assignmentsReceived IncidentAssignment[] @relation("AssignmentAssignee")
+
+  progressNotes     IncidentProgressNote[]
+  resolutions       IncidentResolution[]
+  incidentHistories IncidentHistory[]
+
+  @@index([departmentId])
   @@map("users")
 }
 
-model Media {
-  id        String   @id @default(uuid())
-  publicId  String   @unique @map("public_id")
-  url       String
-  format    String?
-  bytes     Int?
-  userId    String?  @map("user_id")
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  createdAt DateTime @default(now()) @map("created_at")
+model EmailActivationToken {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  tokenHash     String    @unique @map("token_hash")
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt        DateTime? @map("used_at") @db.Timestamptz(3)
+  invalidatedAt DateTime? @map("invalidated_at") @db.Timestamptz(3)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("email_activation_tokens")
+}
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  techStaff        User[]
+  defaultBuildings Building[]
+  assignments      IncidentAssignment[]
+
+  @@map("departments")
+}
+
+model Building {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  address             String?
+  description         String?
+  defaultDepartmentId Int?     @map("default_department_id")
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  defaultDepartment Department? @relation(fields: [defaultDepartmentId], references: [id], onDelete: Restrict)
+  floors            Floor[]
+  locations         Location[]
+  incidentReports   IncidentReport[]
+
+  @@index([defaultDepartmentId])
+  @@map("buildings")
+}
+
+model Floor {
+  id          Int      @id @default(autoincrement())
+  buildingId  Int      @map("building_id")
+  name        String
+  floorNumber Int?     @map("floor_number")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  building  Building   @relation(fields: [buildingId], references: [id], onDelete: Restrict)
+  locations Location[]
+
+  @@unique([buildingId, name])
+  @@unique([buildingId, id])
+  @@map("floors")
+}
+
+model Location {
+  id           Int      @id @default(autoincrement())
+  buildingId   Int      @map("building_id")
+  floorId      Int?     @map("floor_id")
+  name         String
+  locationType String?  @map("location_type")
+  description  String?
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  building        Building         @relation(fields: [buildingId], references: [id], onDelete: Restrict)
+  floor           Floor?           @relation(fields: [floorId], references: [id], onDelete: Restrict)
+  incidentReports IncidentReport[]
+
+  @@unique([buildingId, id])
+  @@index([buildingId])
+  @@index([floorId])
+  @@map("locations")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  incidentReports IncidentReport[]
+
+  @@map("categories")
+}
+
+model Media {
+  id           Int      @id @default(autoincrement())
+  publicId     String   @unique @map("public_id")
+  url          String
+  format       String?
+  bytes        Int?
+  userId       Int?     @map("user_id")
+  reportId     Int?     @map("report_id")
+  resolutionId Int?     @map("resolution_id")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  user       User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  report     IncidentReport?     @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  resolution IncidentResolution? @relation(fields: [resolutionId], references: [id], onDelete: Restrict)
+
+  @@index([userId])
+  @@index([reportId])
+  @@index([resolutionId])
   @@map("media")
+}
+
+model IncidentReport {
+  id          Int              @id @default(autoincrement())
+  studentId   Int              @map("student_id")
+  categoryId  Int              @map("category_id")
+  buildingId  Int              @map("building_id")
+  locationId  Int              @map("location_id")
+  title       String
+  description String
+  urgency     IncidentUrgency?
+  status      ReportStatus     @default(PENDING)
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  student  User     @relation(fields: [studentId], references: [id], onDelete: Restrict)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  building Building @relation(fields: [buildingId], references: [id], onDelete: Restrict)
+  location Location @relation(fields: [locationId], references: [id], onDelete: Restrict)
+
+  media     Media[]
+  histories IncidentReportHistory[]
+  incident  Incident?
+
+  @@index([studentId])
+  @@index([categoryId])
+  @@index([buildingId])
+  @@index([locationId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("incident_reports")
+}
+
+model IncidentReportHistory {
+  id         Int                 @id @default(autoincrement())
+  reportId   Int                 @map("report_id")
+  actorId    Int                 @map("actor_id")
+  action     ReportHistoryAction
+  fromStatus ReportStatus?       @map("from_status")
+  toStatus   ReportStatus        @map("to_status")
+  reason     String?
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  report IncidentReport @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  actor  User           @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([reportId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("incident_report_histories")
+}
+
+model Incident {
+  id        Int             @id @default(autoincrement())
+  reportId  Int             @unique @map("report_id")
+  status    IncidentStatus  @default(PENDING_ASSIGNMENT)
+  urgency   IncidentUrgency
+  deadline  DateTime?       @db.Timestamptz(3)
+  createdAt DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  report        IncidentReport         @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  assignments   IncidentAssignment[]
+  progressNotes IncidentProgressNote[]
+  resolutions   IncidentResolution[]
+  histories     IncidentHistory[]
+
+  @@index([status])
+  @@index([urgency])
+  @@index([deadline])
+  @@map("incidents")
+}
+
+model IncidentAssignment {
+  id           Int       @id @default(autoincrement())
+  incidentId   Int       @map("incident_id")
+  departmentId Int       @map("department_id")
+  assignedById Int       @map("assigned_by_id")
+  assigneeId   Int       @map("assignee_id")
+  isCurrent    Boolean   @default(true) @map("is_current")
+  isActive     Boolean   @default(true) @map("is_active")
+  endedAt      DateTime? @map("ended_at") @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident   Incident   @relation(fields: [incidentId], references: [id], onDelete: Restrict)
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  assignedBy User       @relation("AssignmentAssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+  assignee   User       @relation("AssignmentAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  histories  IncidentHistory[]
+
+  @@unique([incidentId, id])
+  @@index([incidentId])
+  @@index([departmentId])
+  @@index([assignedById])
+  @@index([assigneeId])
+  @@map("incident_assignments")
+}
+
+model IncidentProgressNote {
+  id         Int      @id @default(autoincrement())
+  incidentId Int      @map("incident_id")
+  authorId   Int      @map("author_id")
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident Incident @relation(fields: [incidentId], references: [id], onDelete: Restrict)
+  author   User     @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([incidentId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("incident_progress_notes")
+}
+
+model IncidentResolution {
+  id             Int      @id @default(autoincrement())
+  incidentId     Int      @map("incident_id")
+  resolvedById   Int      @map("resolved_by_id")
+  resolutionNote String   @map("resolution_note")
+  resolvedAt     DateTime @map("resolved_at") @db.Timestamptz(3)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident   Incident          @relation(fields: [incidentId], references: [id], onDelete: Restrict)
+  resolvedBy User              @relation(fields: [resolvedById], references: [id], onDelete: Restrict)
+  media      Media[]
+  histories  IncidentHistory[]
+
+  @@unique([incidentId, id])
+  @@index([incidentId])
+  @@index([resolvedById])
+  @@index([resolvedAt])
+  @@map("incident_resolutions")
+}
+
+model IncidentHistory {
+  id           Int                   @id @default(autoincrement())
+  incidentId   Int                   @map("incident_id")
+  actorId      Int                   @map("actor_id")
+  assignmentId Int?                  @map("assignment_id")
+  resolutionId Int?                  @map("resolution_id")
+  action       IncidentHistoryAction
+  fromStatus   IncidentStatus?       @map("from_status")
+  toStatus     IncidentStatus?       @map("to_status")
+  reason       String?
+  createdAt    DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  incident   Incident            @relation(fields: [incidentId], references: [id], onDelete: Restrict)
+  actor      User                @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  assignment IncidentAssignment? @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+  resolution IncidentResolution? @relation(fields: [resolutionId], references: [id], onDelete: Restrict)
+
+  @@index([incidentId])
+  @@index([actorId])
+  @@index([assignmentId])
+  @@index([resolutionId])
+  @@index([createdAt])
+  @@map("incident_histories")
 }
