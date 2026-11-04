@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { registerRequest } from '../api/auth.api';
 import { readErrorMessage } from '../lib/api-error';
-import { emailError, fullNameError, passwordError } from '../lib/auth-rules';
+import { emailError, fullNameError, passwordError, PASSWORD_POLICY_MESSAGE } from '../lib/auth-rules';
 import { TextField } from './text-field';
 
 export function RegisterForm() {
@@ -93,9 +93,10 @@ export function RegisterForm() {
           autoComplete="new-password"
           value={password}
           aria-invalid={fieldErrors.password ? true : undefined}
-          aria-describedby={fieldErrors.password ? 'register-password-error' : undefined}
+          aria-describedby={fieldErrors.password ? 'register-password-helper register-password-error' : 'register-password-helper'}
           onChange={(event) => setPassword(event.target.value)}
         />
+        <p id="register-password-helper" className="auth-helper">{PASSWORD_POLICY_MESSAGE}</p>
       </TextField>
       <TextField id="register-confirm" label="Xác nhận mật khẩu" error={fieldErrors.confirmPassword}>
         <input
