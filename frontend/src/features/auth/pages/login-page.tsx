@@ -3,7 +3,7 @@ import { LoginForm } from '../components/login-form';
 
 export function LoginPage() {
   return (
-    <GateShell>
+    <GateShell title="Đăng nhập vào tài khoản của bạn">
       <LoginForm />
     </GateShell>
   );

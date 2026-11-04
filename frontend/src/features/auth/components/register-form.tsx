@@ -60,7 +60,6 @@ export function RegisterForm() {
   if (success) {
     return (
       <div className="gate-form is-register">
-        <h1>Tạo tài khoản sinh viên</h1>
         <p className="gate-success" role="status">
           {success}
         </p>
@@ -73,8 +72,6 @@ export function RegisterForm() {
 
   return (
     <form className="gate-form is-register" onSubmit={onSubmit} noValidate>
-      <h1>Tạo tài khoản sinh viên</h1>
-      <p className="gate-lede">Hệ thống sự cố cơ sở vật chất dành cho UIT.</p>
       <div className="gate-tabs">
         <NavLink className={({ isActive }) => `gate-tab${isActive ? ' is-active' : ''}`} to="/login">
           Đăng nhập
@@ -83,44 +80,42 @@ export function RegisterForm() {
           Đăng ký
         </NavLink>
       </div>
-      <div className="gate-fields">
-        <div className="gate-row">
-          <label className="gate-field" htmlFor="register-name">
-            <span>Họ và tên</span>
-            <span className="gate-control">
-              <input
-                id="register-name"
-                name="fullName"
-                type="text"
-                autoComplete="name"
-                value={fullName}
-                aria-invalid={fieldErrors.fullName ? true : undefined}
-                aria-describedby={fieldErrors.fullName ? 'register-name-error' : undefined}
-                onChange={(event) => setFullName(event.target.value)}
-              />
-            </span>
-          </label>
-          <label className="gate-field" htmlFor="register-student-id">
-            <span>MSSV</span>
-            <span className="gate-control">
-              <input
-                id="register-student-id"
-                name="studentId"
-                type="text"
-                inputMode="numeric"
-                autoComplete="off"
-                value={studentId}
-                onChange={(event) => setStudentId(event.target.value)}
-              />
-            </span>
-          </label>
-        </div>
-        {fieldErrors.fullName ? (
-          <p className="gate-error" id="register-name-error">
-            {fieldErrors.fullName}
-          </p>
-        ) : null}
-        <label className="gate-field" htmlFor="register-email">
+      <div className="form-grid">
+        <label className="gate-field" htmlFor="register-name">
+          <span>Họ và tên</span>
+          <span className="gate-control">
+            <input
+              id="register-name"
+              name="fullName"
+              type="text"
+              autoComplete="name"
+              value={fullName}
+              aria-invalid={fieldErrors.fullName ? true : undefined}
+              aria-describedby={fieldErrors.fullName ? 'register-name-error' : undefined}
+              onChange={(event) => setFullName(event.target.value)}
+            />
+          </span>
+          {fieldErrors.fullName ? (
+            <p className="gate-error" id="register-name-error">
+              {fieldErrors.fullName}
+            </p>
+          ) : null}
+        </label>
+        <label className="gate-field" htmlFor="register-student-id">
+          <span>MSSV</span>
+          <span className="gate-control">
+            <input
+              id="register-student-id"
+              name="studentId"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              value={studentId}
+              onChange={(event) => setStudentId(event.target.value)}
+            />
+          </span>
+        </label>
+        <label className="gate-field full" htmlFor="register-email">
           <span>Email sinh viên</span>
           <span className="gate-control">
             <input
@@ -136,13 +131,13 @@ export function RegisterForm() {
             />
             <span className="gate-domain">@{UIT_STUDENT_EMAIL_DOMAIN}</span>
           </span>
+          {fieldErrors.email ? (
+            <p className="gate-error" id="register-email-error">
+              {fieldErrors.email}
+            </p>
+          ) : null}
         </label>
-        {fieldErrors.email ? (
-          <p className="gate-error" id="register-email-error">
-            {fieldErrors.email}
-          </p>
-        ) : null}
-        <label className="gate-field gate-phone" htmlFor="register-phone">
+        <label className="gate-field full" htmlFor="register-phone">
           <span>Số điện thoại</span>
           <span className="gate-control">
             <input
@@ -155,38 +150,38 @@ export function RegisterForm() {
             />
           </span>
         </label>
-        <div className="gate-row">
-          <PasswordField
-            id="register-password"
-            label="Mật khẩu"
-            autoComplete="new-password"
-            value={password}
-            visible={visible.password}
-            error={fieldErrors.password}
-            errorId="register-password-error"
-            onChange={setPassword}
-            onToggle={() => setVisible((current) => ({ ...current, password: !current.password }))}
-          />
-          <PasswordField
-            id="register-confirm"
-            label="Nhập lại mật khẩu"
-            autoComplete="new-password"
-            value={confirmPassword}
-            visible={visible.confirm}
-            error={fieldErrors.confirmPassword}
-            errorId="register-confirm-error"
-            onChange={setConfirmPassword}
-            onToggle={() => setVisible((current) => ({ ...current, confirm: !current.confirm }))}
-          />
+        <PasswordField
+          id="register-password"
+          label="Mật khẩu"
+          autoComplete="new-password"
+          value={password}
+          visible={visible.password}
+          error={fieldErrors.password}
+          errorId="register-password-error"
+          onChange={setPassword}
+          onToggle={() => setVisible((current) => ({ ...current, password: !current.password }))}
+        />
+        <PasswordField
+          id="register-confirm"
+          label="Nhập lại mật khẩu"
+          autoComplete="new-password"
+          value={confirmPassword}
+          visible={visible.confirm}
+          error={fieldErrors.confirmPassword}
+          errorId="register-confirm-error"
+          onChange={setConfirmPassword}
+          onToggle={() => setVisible((current) => ({ ...current, confirm: !current.confirm }))}
+        />
+        <div className="full" style={{ display: 'grid', gap: '8px' }}>
+          <div className="gate-meter" data-strength={strength} aria-hidden="true">
+            {[0, 1, 2, 3].map((segment) => (
+              <i key={segment} className={segment < strength ? 'is-on' : undefined} />
+            ))}
+          </div>
+          <p className="gate-hint">
+            {strength >= 3 ? 'Mật khẩu mạnh · Tối thiểu 8 ký tự' : 'Tối thiểu 8 ký tự, gồm chữ và số'}
+          </p>
         </div>
-        <div className="gate-meter" aria-hidden="true">
-          {[0, 1, 2, 3].map((segment) => (
-            <i key={segment} className={segment < strength ? 'is-on' : undefined} />
-          ))}
-        </div>
-        <p className="gate-hint">
-          {strength >= 3 ? 'Mật khẩu mạnh · Tối thiểu 8 ký tự' : 'Tối thiểu 8 ký tự, gồm chữ và số'}
-        </p>
       </div>
       {formError ? (
         <p className="gate-alert" role="alert">

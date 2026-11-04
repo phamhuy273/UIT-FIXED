@@ -28,6 +28,20 @@ export function composeStudentEmail(localPart: string): string {
   return `${value}@${UIT_STUDENT_EMAIL_DOMAIN}`;
 }
 
+export function loginEmailError(value: string): string | null {
+  const email = normalizeEmail(value);
+  if (!email) {
+    return 'Nhập email đăng nhập.';
+  }
+  const atIndex = email.indexOf('@');
+  const shaped =
+    atIndex > 0 && atIndex === email.lastIndexOf('@') && atIndex < email.length - 1 && !/\s/.test(email);
+  if (!shaped) {
+    return INVALID_EMAIL_MESSAGE;
+  }
+  return null;
+}
+
 export function emailError(value: string): string | null {
   const email = normalizeEmail(value);
   if (!email) {

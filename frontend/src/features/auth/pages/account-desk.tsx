@@ -1,22 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth.store';
-import { AuthFrame } from '../components/auth-frame';
 import { PageHeader } from '@/components/ui/page-header';
-import '../auth.css';
 import { roleLabel } from '../lib/auth-rules';
+import { LogOut } from 'lucide-react';
 
 const copy = {
   student: {
-    title: 'Sinh viên',
-    note: 'Phiếu sự cố bạn gửi sẽ gắn với tài khoản này.',
+    note: 'Phiếu sự cố bạn gửi sẽ gắn với thông tin tài khoản này.',
   },
   admin: {
-    title: 'Quản trị',
-    note: 'Khu vực này chỉ mở cho tài khoản quản trị.',
+    note: 'Tài khoản quản trị cơ sở vật chất hệ thống UIT-FIXED.',
   },
   staff: {
-    title: 'Kỹ thuật',
-    note: 'Việc được giao cho phòng ban của bạn sẽ nằm ở đây.',
+    note: 'Việc được giao cho phòng ban của bạn sẽ gắn với tài khoản này.',
   },
 } as const;
 
@@ -32,43 +28,57 @@ export function AccountDesk({ scope }: { scope: keyof typeof copy }) {
   }
 
   const createdAt = user ? formatCreatedAt(user.createdAt) : '—';
+  const initial = user?.fullName
+    ? user.fullName.trim().split(' ').pop()?.charAt(0).toUpperCase() || 'U'
+    : (user?.email?.charAt(0).toUpperCase() ?? 'U');
 
-  const content = (
-    <>
-      <dl className="auth-facts">
+  return (
+    <div className="page page--account">
+      <PageHeader
+        title="Tài khoản"
+        description={page.note}
+      />
+
+      <div className="card profile">
+        <div className="avatar avatar--lg">{initial}</div>
         <div>
-          <dt>Họ và tên</dt>
-          <dd>{user?.fullName || <span className="auth-missing">—</span>}</dd>
+          <h2>{user?.fullName || 'Người dùng UIT'}</h2>
+          <p className="text-muted">{user?.email || '—'}</p>
         </div>
-        <div>
-          <dt>Email</dt>
-          <dd className="is-hue">{user?.email}</dd>
-        </div>
-        <div>
-          <dt>Vai trò</dt>
-          <dd>{user ? roleLabel(user.role) : <span className="auth-missing">—</span>}</dd>
-        </div>
-        <div>
-          <dt>Mã phòng ban</dt>
-          <dd>
-            {user?.departmentId ?? <span className="auth-missing">—</span>}
-          </dd>
-        </div>
-        <div>
-          <dt>Mở tài khoản</dt>
-          <dd>{createdAt}</dd>
-        </div>
-      </dl>
-      <div className="auth-actions">
-        <button className="auth-button" type="button" onClick={logout}>
-          Đăng xuất
-        </button>
+        <span className="badge badge--neutral">
+          {user ? roleLabel(user.role) : '—'}
+        </span>
       </div>
-    </>
+
+      <div className="card" style={{ padding: '24px 32px' }}>
+        <dl className="detail">
+          <div>
+            <dt>Vai trò</dt>
+            <dd>
+              <span className="badge badge--neutral">
+                {user ? roleLabel(user.role) : '—'}
+              </span>
+            </dd>
+          </div>
+          <div>
+            <dt>Mã phòng ban</dt>
+            <dd className="text-muted">{user?.departmentId ?? 'Không trực thuộc (SV/Admin)'}</dd>
+          </div>
+          <div>
+            <dt>Mở tài khoản</dt>
+            <dd className="num">{createdAt}</dd>
+          </div>
+        </dl>
+
+        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-start' }}>
+          <button className="btn btn--secondary btn--sm" type="button" onClick={logout}>
+            <LogOut size={16} />
+            Đăng xuất
+          </button>
+        </div>
+      </div>
+    </div>
   );
-  return scope === 'staff'
-    ? <AuthFrame title={page.title} aside={<p className="auth-note">{page.note}</p>}>{content}</AuthFrame>
-    : <section className="account-page"><PageHeader title={page.title} description={page.note} /><div className="account-panel">{content}</div></section>;
 }
 
 function formatCreatedAt(value: string): string {
@@ -77,7 +87,7 @@ function formatCreatedAt(value: string): string {
     return '—';
   }
   return new Intl.DateTimeFormat('vi-VN', {
-    dateStyle: 'medium',
+    dateStyle: 'short',
     timeStyle: 'short',
   }).format(date);
 }

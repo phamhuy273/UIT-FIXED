@@ -1,19 +1,62 @@
 import type { HTMLAttributes } from 'react';
 
-type Status = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'PENDING_ASSIGNMENT' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
-type Urgency = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
-export type BadgeProps = HTMLAttributes<HTMLSpanElement> & (
-  { kind: 'status'; value: Status } | { kind: 'urgency'; value: Urgency }
-);
+type Status =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'CANCELLED'
+  | 'PENDING_ASSIGNMENT'
+  | 'ASSIGNED'
+  | 'IN_PROGRESS'
+  | 'RESOLVED'
+  | 'CLOSED'
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled'
+  | 'in_progress'
+  | 'resolved';
 
-const labels: Record<Status | Urgency, string> = {
-  PENDING: 'Chờ duyệt', APPROVED: 'Đã duyệt', REJECTED: 'Từ chối', CANCELLED: 'Đã hủy',
-  PENDING_ASSIGNMENT: 'Chờ phân công', ASSIGNED: 'Đã phân công', IN_PROGRESS: 'Đang xử lý',
-  RESOLVED: 'Đã khắc phục', CLOSED: 'Đã đóng', CRITICAL: 'Khẩn cấp', HIGH: 'Cao', MEDIUM: 'Bình thường', LOW: 'Thấp',
+type Urgency = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'critical' | 'high' | 'medium' | 'low';
+
+export type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
+  kind?: 'status' | 'urgency';
+  value: Status | Urgency;
+  withDot?: boolean;
 };
 
-export function Badge({ kind, value, className = '', children, ...props }: BadgeProps) {
-  return <span {...props} className={`ui-badge ui-badge--${kind}-${value.toLowerCase()} ${className}`}>
-    <span className="badge-dot" aria-hidden="true" />{children ?? labels[value]}
-  </span>;
+const TONE_MAP: Record<string, { label: string; tone: 'warning' | 'info' | 'success' | 'danger' | 'neutral' }> = {
+  // Status
+  pending: { label: 'Chờ duyệt', tone: 'warning' },
+  approved: { label: 'Đã duyệt', tone: 'info' },
+  pending_assignment: { label: 'Chờ phân công', tone: 'info' },
+  assigned: { label: 'Đã phân công', tone: 'info' },
+  in_progress: { label: 'Đang xử lý', tone: 'info' },
+  resolved: { label: 'Đã khắc phục', tone: 'success' },
+  closed: { label: 'Đã đóng', tone: 'neutral' },
+  rejected: { label: 'Từ chối', tone: 'danger' },
+  cancelled: { label: 'Đã hủy', tone: 'neutral' },
+
+  // Urgency
+  critical: { label: 'Khẩn cấp', tone: 'danger' },
+  high: { label: 'Cao', tone: 'warning' },
+  medium: { label: 'Bình thường', tone: 'info' },
+  low: { label: 'Thấp', tone: 'neutral' },
+};
+
+export function Badge({ kind = 'status', value, withDot = true, className = '', children, ...props }: BadgeProps) {
+  const key = String(value).toLowerCase();
+  const config = TONE_MAP[key] ?? { label: String(value), tone: 'neutral' };
+
+  return (
+    <span
+      {...props}
+      className={`badge badge--${config.tone} ui-badge ui-badge--${kind}-${key} ${className}`}
+    >
+      {withDot ? <span className="badge__dot badge-dot" aria-hidden="true" /> : null}
+      {children ?? config.label}
+    </span>
+  );
 }
+
+export default Badge;

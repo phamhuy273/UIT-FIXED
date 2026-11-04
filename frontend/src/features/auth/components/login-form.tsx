@@ -7,9 +7,8 @@ import { readErrorMessage } from '../lib/api-error';
 import {
   UIT_STUDENT_EMAIL_DOMAIN,
   composeStudentEmail,
-  emailError,
+  loginEmailError,
   roleHome,
-  studentLocalPart,
 } from '../lib/auth-rules';
 
 export function LoginForm() {
@@ -18,6 +17,7 @@ export function LoginForm() {
   const [localPart, setLocalPart] = useState('');
   const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -29,7 +29,7 @@ export function LoginForm() {
     }
     const email = composeStudentEmail(localPart);
     const nextErrors = {
-      email: emailError(email) ?? undefined,
+      email: loginEmailError(email) ?? undefined,
       password: password ? undefined : 'Nhập mật khẩu.',
     };
     setFieldErrors(nextErrors);
@@ -52,8 +52,6 @@ export function LoginForm() {
 
   return (
     <form className="gate-form" onSubmit={onSubmit} noValidate>
-      <h1>Chào mừng bạn trở lại</h1>
-      <p className="gate-lede">Hệ thống sự cố cơ sở vật chất dành cho UIT.</p>
       <div className="gate-tabs">
         <NavLink className={({ isActive }) => `gate-tab${isActive ? ' is-active' : ''}`} to="/login">
           Đăng nhập
@@ -64,7 +62,7 @@ export function LoginForm() {
       </div>
       <div className="gate-fields">
         <label className="gate-field" htmlFor="login-email">
-          <span>Email sinh viên</span>
+          <span>Tài khoản / Email</span>
           <span className="gate-control">
             <input
               id="login-email"
@@ -72,12 +70,15 @@ export function LoginForm() {
               type="text"
               autoComplete="username"
               inputMode="email"
+              placeholder="MSSV hoặc Email"
               value={localPart}
               aria-invalid={fieldErrors.email ? true : undefined}
               aria-describedby={fieldErrors.email ? 'login-email-error' : undefined}
-              onChange={(event) => setLocalPart(studentLocalPart(event.target.value))}
+              onChange={(event) => setLocalPart(event.target.value)}
             />
-            <span className="gate-domain">@{UIT_STUDENT_EMAIL_DOMAIN}</span>
+            {!localPart.includes('@') ? (
+              <span className="gate-domain">@{UIT_STUDENT_EMAIL_DOMAIN}</span>
+            ) : null}
           </span>
         </label>
         {fieldErrors.email ? (
@@ -93,6 +94,7 @@ export function LoginForm() {
               name="password"
               type={passwordVisible ? 'text' : 'password'}
               autoComplete="current-password"
+              placeholder="Nhập mật khẩu"
               value={password}
               aria-invalid={fieldErrors.password ? true : undefined}
               aria-describedby={fieldErrors.password ? 'login-password-error' : undefined}
@@ -114,7 +116,17 @@ export function LoginForm() {
             {fieldErrors.password}
           </p>
         ) : null}
-        <p className="gate-forgot">Quên mật khẩu?</p>
+        <div className="gate-options">
+          <label className="gate-remember">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            <span>Ghi nhớ tôi</span>
+          </label>
+          <span className="gate-forgot">Quên mật khẩu?</span>
+        </div>
       </div>
       {formError ? (
         <p className="gate-alert" role="alert">

@@ -3,7 +3,7 @@ import { RegisterForm } from '../components/register-form';
 
 export function RegisterPage() {
   return (
-    <GateShell>
+    <GateShell title="Đăng ký tài khoản sinh viên">
       <RegisterForm />
     </GateShell>
   );
