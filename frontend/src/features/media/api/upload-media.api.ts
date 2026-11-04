@@ -1,11 +1,10 @@
 import { apiClient } from '@/lib/axios';
 
 export interface UploadMediaResponse {
+  id: number;
   url: string;
   publicId: string;
   format: string;
-  width: number;
-  height: number;
 }
 
 export const uploadMediaApi = async (file: File): Promise<UploadMediaResponse> => {

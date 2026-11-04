@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module.js';
 import { MediaController } from './controllers/media.controller.js';
 import { MediaService } from './services/media.service.js';
 import { CloudinaryModule } from '../../shared/cloudinary/cloudinary.module.js';
 
 @Module({
-  imports: [CloudinaryModule],
+  imports: [CloudinaryModule, AuthModule],
   controllers: [MediaController],
   providers: [MediaService],
   exports: [MediaService],

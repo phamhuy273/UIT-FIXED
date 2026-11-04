@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:master-data": "node --experimental-strip-types --test test/location-selection.test.ts",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
@@ -15,6 +16,7 @@
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.5",
+    "recharts": "^3.10.1",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

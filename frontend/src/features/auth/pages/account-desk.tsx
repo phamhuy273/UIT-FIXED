@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/auth.store';
 import { AuthFrame } from '../components/auth-frame';
+import { PageHeader } from '@/components/ui/page-header';
+import '../auth.css';
 import { roleLabel } from '../lib/auth-rules';
 
 const copy = {
@@ -31,8 +33,8 @@ export function AccountDesk({ scope }: { scope: keyof typeof copy }) {
 
   const createdAt = user ? formatCreatedAt(user.createdAt) : '—';
 
-  return (
-    <AuthFrame title={page.title} aside={<p className="auth-note">{page.note}</p>}>
+  const content = (
+    <>
       <dl className="auth-facts">
         <div>
           <dt>Họ và tên</dt>
@@ -62,8 +64,11 @@ export function AccountDesk({ scope }: { scope: keyof typeof copy }) {
           Đăng xuất
         </button>
       </div>
-    </AuthFrame>
+    </>
   );
+  return scope === 'staff'
+    ? <AuthFrame title={page.title} aside={<p className="auth-note">{page.note}</p>}>{content}</AuthFrame>
+    : <section className="account-page"><PageHeader title={page.title} description={page.note} /><div className="account-panel">{content}</div></section>;
 }
 
 function formatCreatedAt(value: string): string {

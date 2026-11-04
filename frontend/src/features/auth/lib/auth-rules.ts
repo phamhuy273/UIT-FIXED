@@ -14,6 +14,20 @@ export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
+export function studentLocalPart(value: string): string {
+  const email = normalizeEmail(value);
+  const suffix = `@${UIT_STUDENT_EMAIL_DOMAIN}`;
+  return email.endsWith(suffix) ? email.slice(0, -suffix.length) : value;
+}
+
+export function composeStudentEmail(localPart: string): string {
+  const value = normalizeEmail(localPart);
+  if (!value || value.includes('@')) {
+    return value;
+  }
+  return `${value}@${UIT_STUDENT_EMAIL_DOMAIN}`;
+}
+
 export function emailError(value: string): string | null {
   const email = normalizeEmail(value);
   if (!email) {

@@ -25,7 +25,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const message =
       exception instanceof HttpException
         ? exception.getResponse()
-        : (exception as any)?.message || 'Internal server error';
+        : 'Có lỗi hệ thống. Vui lòng thử lại sau.';
 
     const errorMessage =
       typeof message === 'object' && message !== null

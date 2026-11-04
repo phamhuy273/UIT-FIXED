@@ -1,24 +1,35 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { readErrorMessage } from '@/features/auth/lib/api-error';
 import { uploadMediaApi, type UploadMediaResponse } from '../api/upload-media.api';
 
 interface ImageUploaderProps {
   onSuccess?: (result: UploadMediaResponse) => void;
   folder?: string;
+  disabled?: boolean;
+  onLoadingChange?: (loading: boolean) => void;
 }
 
-export const ImageUploader: React.FC<ImageUploaderProps> = ({ onSuccess }) => {
+export const ImageUploader: React.FC<ImageUploaderProps> = ({ onSuccess, disabled = false, onLoadingChange }) => {
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl); }, [previewUrl]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || disabled || loading) return;
 
     // Validate size (< 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError('Dung lượng ảnh không được vượt quá 5MB.');
+      e.target.value = '';
+      return;
+    }
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      setError('Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.');
+      e.target.value = '';
       return;
     }
 
@@ -26,6 +37,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onSuccess }) => {
     setPreviewUrl(URL.createObjectURL(file));
     setError(null);
     setLoading(true);
+    onLoadingChange?.(true);
 
     try {
       const response = await uploadMediaApi(file);
@@ -33,46 +45,35 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({ onSuccess }) => {
       if (onSuccess) {
         onSuccess(response);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      setError(readErrorMessage(err, 'Upload ảnh thất bại.'));
+    } finally {
       setLoading(false);
-      setError(err?.message || 'Upload ảnh thất bại.');
+      onLoadingChange?.(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
   return (
-    <div style={{ border: '2px dashed #cbd5e1', borderRadius: '8px', padding: '24px', textAlign: 'center' }}>
+    <div className="image-uploader" aria-busy={loading}>
       <input
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}
         accept="image/png, image/jpeg, image/webp"
-        style={{ display: 'none' }}
+        disabled={disabled || loading}
+        hidden
       />
       {previewUrl ? (
-        <div style={{ marginBottom: '12px' }}>
-          <img
-            src={previewUrl}
-            alt="Preview"
-            style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '6px', objectFit: 'cover' }}
-          />
+        <div className="image-uploader-preview">
+          <img src={previewUrl} alt="Preview" />
         </div>
-      ) : null}
-      <button
-        type="button"
-        disabled={loading}
-        onClick={() => fileInputRef.current?.click()}
-        style={{
-          padding: '8px 16px',
-          background: '#2563eb',
-          color: '#fff',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: loading ? 'not-allowed' : 'pointer',
-        }}
-      >
+      ) : <span className="image-uploader-icon" aria-hidden="true">↑</span>}
+      <Button type="button" variant="secondary" disabled={loading || disabled}
+        onClick={() => fileInputRef.current?.click()}>
         {loading ? 'Đang tải lên Cloudinary...' : 'Chọn hình ảnh'}
-      </button>
-      {error && <p style={{ color: '#ef4444', marginTop: '8px' }}>{error}</p>}
+      </Button>
+      {error && <p className="field-error" role="alert">{error}</p>}
     </div>
   );
 };
