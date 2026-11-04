@@ -8,6 +8,7 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
+  ParseIntPipe,
   MaxFileSizeValidator,
   FileTypeValidator,
 } from '@nestjs/common';
@@ -46,7 +47,7 @@ export class MediaController {
   }
 
   @Delete(':id')
-  async deleteMedia(@Param('id') id: string) {
+  async deleteMedia(@Param('id', ParseIntPipe) id: number) {
     return this.mediaService.deleteImage(id);
   }
 }

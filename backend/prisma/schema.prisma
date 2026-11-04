@@ -1,5 +1,5 @@
-// Prisma schema definition for PostgreSQL
-
+// UIT-FIXED: latest supplied DBML (integer IDs, direct staff assignment).
+// Cross-table business rules and workflow permissions require application validation.
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,34 +10,345 @@ datasource db {
 }
 
 enum Role {
-  USER
+  STUDENT
   ADMIN
+  TECH_STAFF
 }
 
+enum ReportStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum IncidentStatus {
+  PENDING_ASSIGNMENT
+  ASSIGNED
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ReportHistoryAction {
+  CREATED
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum IncidentHistoryAction {
+  CREATED
+  ASSIGNED
+  REASSIGNED
+  REJECTED
+  RESOLVED
+  REOPENED
+}
+
+enum IncidentUrgency {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+/// TECH_STAFF must belong to exactly one Department. STUDENT and ADMIN must not belong to a Department. is_active represents account activation, not staff availability.
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  fullName  String?  @map("full_name")
-  role      Role     @default(USER)
-  avatarUrl String?  @map("avatar_url")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id                  Int                     @id @default(autoincrement())
+  email               String                  @unique @db.VarChar
+  password            String                  @db.VarChar
+  fullName            String?                 @map("full_name") @db.VarChar
+  role                Role                    @default(STUDENT)
+  avatarUrl           String?                 @map("avatar_url") @db.VarChar
+  departmentId        Int?                    @map("department_id")
+  isActive            Boolean                 @default(false) @map("is_active")
+  createdAt           DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+  department          Department?             @relation("User_department", fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  activationTokens    EmailActivationToken[]  @relation("EmailActivationToken_user")
+  media               Media[]                 @relation("Media_user")
+  reports             IncidentReport[]        @relation("IncidentReport_student")
+  reportHistories     IncidentReportHistory[] @relation("IncidentReportHistory_actor")
+  assignedAssignments IncidentAssignment[]    @relation("IncidentAssignment_assignedBy")
+  receivedAssignments IncidentAssignment[]    @relation("IncidentAssignment_assignee")
+  progressNotes       IncidentProgressNote[]  @relation("IncidentProgressNote_author")
+  resolutions         IncidentResolution[]    @relation("IncidentResolution_resolvedBy")
+  incidentHistories   IncidentHistory[]       @relation("IncidentHistory_actor")
 
-  media Media[]
-
+  @@index([departmentId])
   @@map("users")
 }
 
-model Media {
-  id        String   @id @default(uuid())
-  publicId  String   @unique @map("public_id")
-  url       String
-  format    String?
-  bytes     Int?
-  userId    String?  @map("user_id")
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  createdAt DateTime @default(now()) @map("created_at")
+/// Store only the token hash. Activation token is single-use and expires. Resending activation invalidates previous unused tokens.
+model EmailActivationToken {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @map("user_id")
+  tokenHash     String    @unique @map("token_hash") @db.VarChar
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt        DateTime? @map("used_at") @db.Timestamptz(6)
+  invalidatedAt DateTime? @map("invalidated_at") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  user          User      @relation("EmailActivationToken_user", fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("email_activation_tokens")
+}
+
+/// A Department can be assigned to multiple Buildings as their default Department. A Department can be deactivated only when it has no unfinished assigned Incidents.
+model Department {
+  id          Int                  @id @default(autoincrement())
+  name        String               @db.VarChar
+  description String?
+  isActive    Boolean              @default(true) @map("is_active")
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime             @updatedAt @map("updated_at") @db.Timestamptz(6)
+  users       User[]               @relation("User_department")
+  buildings   Building[]           @relation("Building_defaultDepartment")
+  assignments IncidentAssignment[] @relation("IncidentAssignment_department")
+
+  @@map("departments")
+}
+
+/// A Building may have one default Department. Admin may assign an Incident to a different Department.
+model Building {
+  id                  Int              @id @default(autoincrement())
+  name                String           @db.VarChar
+  address             String?          @db.VarChar
+  description         String?
+  defaultDepartmentId Int?             @map("default_department_id")
+  isActive            Boolean          @default(true) @map("is_active")
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  defaultDepartment   Department?      @relation("Building_defaultDepartment", fields: [defaultDepartmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  floors              Floor[]          @relation("Floor_building")
+  locations           Location[]       @relation("Location_building")
+  reports             IncidentReport[] @relation("IncidentReport_building")
+
+  @@index([defaultDepartmentId])
+  @@map("buildings")
+}
+
+/// A Floor belongs to exactly one Building.
+model Floor {
+  id          Int        @id @default(autoincrement())
+  buildingId  Int        @map("building_id")
+  name        String     @db.VarChar
+  floorNumber Int?       @map("floor_number")
+  isActive    Boolean    @default(true) @map("is_active")
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  building    Building   @relation("Floor_building", fields: [buildingId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  locations   Location[] @relation("Location_floor")
+
+  @@unique([buildingId, name])
+  @@map("floors")
+}
+
+/// A Location belongs to one Building and optionally one Floor. If floor_id is not null, its Floor must belong to the same Building. Location names are not globally unique.
+model Location {
+  id           Int              @id @default(autoincrement())
+  buildingId   Int              @map("building_id")
+  floorId      Int?             @map("floor_id")
+  name         String           @db.VarChar
+  locationType String?          @map("location_type") @db.VarChar
+  description  String?
+  isActive     Boolean          @default(true) @map("is_active")
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  building     Building         @relation("Location_building", fields: [buildingId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  floor        Floor?           @relation("Location_floor", fields: [floorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reports      IncidentReport[] @relation("IncidentReport_location")
+
+  @@index([buildingId])
+  @@index([floorId])
+  @@map("locations")
+}
+
+/// Inactive Categories cannot be selected for new Reports. Used Categories should not be hard-deleted.
+model Category {
+  id          Int              @id @default(autoincrement())
+  name        String           @db.VarChar
+  description String?
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
+  reports     IncidentReport[] @relation("IncidentReport_category")
+
+  @@map("categories")
+}
+
+/// Media can be temporarily unattached. A Media record can belong to a User, an IncidentReport, or an IncidentResolution, but must not be attached to multiple parent types simultaneously. Report photos and Resolution photos remain separate.
+model Media {
+  id           Int                 @id @default(autoincrement())
+  publicId     String              @unique @map("public_id") @db.VarChar
+  url          String              @db.VarChar
+  format       String?             @db.VarChar
+  bytes        Int?
+  userId       Int?                @map("user_id")
+  reportId     Int?                @map("report_id")
+  resolutionId Int?                @map("resolution_id")
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  user         User?               @relation("Media_user", fields: [userId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  report       IncidentReport?     @relation("Media_report", fields: [reportId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  resolution   IncidentResolution? @relation("Media_resolution", fields: [resolutionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([userId])
+  @@index([reportId])
+  @@index([resolutionId])
   @@map("media")
+}
+
+/// Student creates and owns the Report. Student-proposed urgency is optional. Student can cancel only a PENDING Report. Location must belong to the selected Building.
+model IncidentReport {
+  id          Int                     @id @default(autoincrement())
+  studentId   Int                     @map("student_id")
+  categoryId  Int                     @map("category_id")
+  buildingId  Int                     @map("building_id")
+  locationId  Int                     @map("location_id")
+  title       String                  @db.VarChar
+  description String
+  urgency     IncidentUrgency?
+  status      ReportStatus            @default(PENDING)
+  createdAt   DateTime                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime                @updatedAt @map("updated_at") @db.Timestamptz(6)
+  student     User                    @relation("IncidentReport_student", fields: [studentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  category    Category                @relation("IncidentReport_category", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  building    Building                @relation("IncidentReport_building", fields: [buildingId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  location    Location                @relation("IncidentReport_location", fields: [locationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  media       Media[]                 @relation("Media_report")
+  histories   IncidentReportHistory[] @relation("IncidentReportHistory_report")
+  incident    Incident?               @relation("Incident_report")
+
+  @@index([studentId])
+  @@index([categoryId])
+  @@index([buildingId])
+  @@index([locationId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("incident_reports")
+}
+
+/// Append-only history for Report creation, approval, rejection, and cancellation. Rejection and cancellation require a reason.
+model IncidentReportHistory {
+  id         Int                 @id @default(autoincrement())
+  reportId   Int                 @map("report_id")
+  actorId    Int                 @map("actor_id")
+  action     ReportHistoryAction
+  fromStatus ReportStatus?       @map("from_status")
+  toStatus   ReportStatus        @map("to_status")
+  reason     String?
+  createdAt  DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  report     IncidentReport      @relation("IncidentReportHistory_report", fields: [reportId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  actor      User                @relation("IncidentReportHistory_actor", fields: [actorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([reportId])
+  @@index([actorId])
+  @@index([createdAt])
+  @@map("incident_report_histories")
+}
+
+/// In MVP, one approved Report creates exactly one Incident. Incident urgency is confirmed or adjusted by Admin before creation. Incident cannot be cancelled.
+model Incident {
+  id            Int                    @id @default(autoincrement())
+  reportId      Int                    @unique @map("report_id")
+  status        IncidentStatus         @default(PENDING_ASSIGNMENT)
+  urgency       IncidentUrgency
+  deadline      DateTime?              @db.Timestamptz(6)
+  createdAt     DateTime               @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime               @updatedAt @map("updated_at") @db.Timestamptz(6)
+  report        IncidentReport         @relation("Incident_report", fields: [reportId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  assignments   IncidentAssignment[]   @relation("IncidentAssignment_incident")
+  progressNotes IncidentProgressNote[] @relation("IncidentProgressNote_incident")
+  resolutions   IncidentResolution[]   @relation("IncidentResolution_incident")
+  histories     IncidentHistory[]      @relation("IncidentHistory_incident")
+
+  @@index([status])
+  @@index([urgency])
+  @@index([deadline])
+  @@map("incidents")
+}
+
+/// Admin directly assigns an Incident to one Tech Staff in the selected Department. Assignment takes effect immediately. Tech Staff may reject it with a required reason recorded in IncidentHistory. is_current identifies the current allocation of an Incident. is_active identifies an Assignment currently occupying the Tech Staff workload.
+model IncidentAssignment {
+  id           Int               @id @default(autoincrement())
+  incidentId   Int               @map("incident_id")
+  departmentId Int               @map("department_id")
+  assignedById Int               @map("assigned_by_id")
+  assigneeId   Int               @map("assignee_id")
+  isCurrent    Boolean           @default(true) @map("is_current")
+  isActive     Boolean           @default(true) @map("is_active")
+  endedAt      DateTime?         @map("ended_at") @db.Timestamptz(6)
+  createdAt    DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  incident     Incident          @relation("IncidentAssignment_incident", fields: [incidentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  department   Department        @relation("IncidentAssignment_department", fields: [departmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  assignedBy   User              @relation("IncidentAssignment_assignedBy", fields: [assignedById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  assignee     User              @relation("IncidentAssignment_assignee", fields: [assigneeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  histories    IncidentHistory[] @relation("IncidentHistory_assignment")
+
+  @@index([incidentId])
+  @@index([departmentId])
+  @@index([assignedById])
+  @@index([assigneeId])
+  @@map("incident_assignments")
+}
+
+/// Tech Staff adds progress updates while handling an assigned Incident. Progress notes are not a replacement for IncidentHistory or IncidentResolution.
+model IncidentProgressNote {
+  id         Int      @id @default(autoincrement())
+  incidentId Int      @map("incident_id")
+  authorId   Int      @map("author_id")
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  incident   Incident @relation("IncidentProgressNote_incident", fields: [incidentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  author     User     @relation("IncidentProgressNote_author", fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([incidentId])
+  @@index([authorId])
+  @@index([createdAt])
+  @@map("incident_progress_notes")
+}
+
+/// An Incident may have multiple Resolution records because Admin can reopen a resolved Incident. Each Resolution is preserved as history.
+model IncidentResolution {
+  id             Int               @id @default(autoincrement())
+  incidentId     Int               @map("incident_id")
+  resolvedById   Int               @map("resolved_by_id")
+  resolutionNote String            @map("resolution_note")
+  resolvedAt     DateTime          @map("resolved_at") @db.Timestamptz(6)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  incident       Incident          @relation("IncidentResolution_incident", fields: [incidentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  resolvedBy     User              @relation("IncidentResolution_resolvedBy", fields: [resolvedById], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  media          Media[]           @relation("Media_resolution")
+  histories      IncidentHistory[] @relation("IncidentHistory_resolution")
+
+  @@index([incidentId])
+  @@index([resolvedById])
+  @@index([resolvedAt])
+  @@map("incident_resolutions")
+}
+
+/// Append-only Incident lifecycle history. REJECTED requires a reason and references the rejected Assignment. REOPENED references both the newly created Assignment and the previous Resolution.
+model IncidentHistory {
+  id           Int                   @id @default(autoincrement())
+  incidentId   Int                   @map("incident_id")
+  actorId      Int                   @map("actor_id")
+  assignmentId Int?                  @map("assignment_id")
+  resolutionId Int?                  @map("resolution_id")
+  action       IncidentHistoryAction
+  fromStatus   IncidentStatus?       @map("from_status")
+  toStatus     IncidentStatus?       @map("to_status")
+  reason       String?
+  createdAt    DateTime              @default(now()) @map("created_at") @db.Timestamptz(6)
+  incident     Incident              @relation("IncidentHistory_incident", fields: [incidentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  actor        User                  @relation("IncidentHistory_actor", fields: [actorId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  assignment   IncidentAssignment?   @relation("IncidentHistory_assignment", fields: [assignmentId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  resolution   IncidentResolution?   @relation("IncidentHistory_resolution", fields: [resolutionId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([incidentId])
+  @@index([actorId])
+  @@index([assignmentId])
+  @@index([resolutionId])
+  @@index([createdAt])
+  @@map("incident_histories")
 }

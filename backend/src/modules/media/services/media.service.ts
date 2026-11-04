@@ -9,7 +9,7 @@ export class MediaService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async uploadImage(file: Express.Multer.File, userId?: string) {
+  async uploadImage(file: Express.Multer.File, userId?: number) {
     // 1. Stream buffer to Cloudinary
     const uploadResult = await this.cloudinaryService.uploadFile(file, 'scrum_media');
 
@@ -20,14 +20,14 @@ export class MediaService {
         url: uploadResult.secure_url,
         format: uploadResult.format,
         bytes: uploadResult.bytes,
-        userId: userId || null,
+        userId: userId ?? null,
       },
     });
 
     return media;
   }
 
-  async deleteImage(id: string) {
+  async deleteImage(id: number) {
     const media = await this.prisma.media.findUnique({ where: { id } });
     if (!media) {
       throw new NotFoundException('Media not found.');
