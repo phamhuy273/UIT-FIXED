@@ -182,7 +182,7 @@ export function ReportList() {
                 </div>
 
                 <div className="report-row__side">
-                  <Badge kind="status" value={report.status} />
+                  <Badge kind="status" value={report.incident?.status ?? report.status} />
                   {report.urgency ? <Badge kind="urgency" value={report.urgency} /> : null}
                   <span className="report-row__time">
                     {new Date(report.createdAt).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}

@@ -110,13 +110,12 @@ input:-webkit-autofill:focus {
 
 .gate-system-intro {
   margin: 0 0 10px;
-  font-size: 14.5px;
-  line-height: 21px;
+  font-size: 15.5px;
+  line-height: 22px;
   font-weight: 600;
   color: #1E3A8A;
   letter-spacing: -0.01em;
   text-align: center;
-  white-space: nowrap;
 }
 
 .gate-card-title {
