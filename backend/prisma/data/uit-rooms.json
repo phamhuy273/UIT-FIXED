@@ -1,0 +1,1157 @@
+{
+  "source": "https://portal.uit.edu.vn/lich-phong",
+  "retrievedOn": "2026-11-04",
+  "groupCounts": {
+    "B": 64,
+    "C": 31,
+    "PH": 4,
+    "E": 14,
+    "A": 10,
+    "SAN_TAP": 8
+  },
+  "rooms": [
+    {
+      "id": 1079,
+      "code": "A114",
+      "name": "A114 (Phòng Họp)",
+      "capacity": 15,
+      "floor": "1",
+      "room_type_code": "PH",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 1077,
+      "code": "A116",
+      "name": "A116 (Phòng Họp)",
+      "capacity": 30,
+      "floor": "1",
+      "room_type_code": "PH",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 981,
+      "code": "A215",
+      "name": "A215",
+      "capacity": 50,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 982,
+      "code": "A301",
+      "name": "A301 (TTNN)",
+      "capacity": 30,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 984,
+      "code": "A305",
+      "name": "A305 (TTNN)",
+      "capacity": 30,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 985,
+      "code": "A307",
+      "name": "A307 (TTNN)",
+      "capacity": 30,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 950,
+      "code": "A315",
+      "name": "A315",
+      "capacity": 50,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 1043,
+      "code": "A323",
+      "name": "A323 (TTNN)",
+      "capacity": 30,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 954,
+      "code": "A325",
+      "name": "A325",
+      "capacity": 48,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 1083,
+      "code": "HTA",
+      "name": "Hội Trường A",
+      "capacity": 600,
+      "floor": "3",
+      "room_type_code": "HT",
+      "place_name": "Nhà A"
+    },
+    {
+      "id": 1651,
+      "code": "ACS01",
+      "name": "Hội Họa",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 998,
+      "code": "B1.02",
+      "name": "B1.02",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 999,
+      "code": "B1.04",
+      "name": "B1.04",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1000,
+      "code": "B1.06",
+      "name": "B1.06",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1001,
+      "code": "B1.08",
+      "name": "B1.08",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1002,
+      "code": "B1.10",
+      "name": "B1.10",
+      "capacity": 70,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1003,
+      "code": "B1.12",
+      "name": "B1.12",
+      "capacity": 70,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1004,
+      "code": "B1.14",
+      "name": "B1.14",
+      "capacity": 160,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1005,
+      "code": "B1.16",
+      "name": "B1.16",
+      "capacity": 90,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1006,
+      "code": "B1.18",
+      "name": "B1.18",
+      "capacity": 90,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1007,
+      "code": "B1.20",
+      "name": "B1.20",
+      "capacity": 100,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1008,
+      "code": "B1.22",
+      "name": "B1.22",
+      "capacity": 100,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 994,
+      "code": "B2.02",
+      "name": "B2.02 (PM)",
+      "capacity": 40,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1066,
+      "code": "B2.06",
+      "name": "B2.06 (PM)",
+      "capacity": 40,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1067,
+      "code": "B2.08",
+      "name": "B2.08 (PM)",
+      "capacity": 40,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1068,
+      "code": "B2.10",
+      "name": "B2.10 (PM)",
+      "capacity": 40,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1065,
+      "code": "B2.12",
+      "name": "B2.12 (PM)",
+      "capacity": 40,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1064,
+      "code": "B2.16",
+      "name": "B2.16 (PM)",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1044,
+      "code": "B2.18",
+      "name": "B2.18 (PM)",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1045,
+      "code": "B2.20",
+      "name": "B2.20 (PM)",
+      "capacity": 60,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1046,
+      "code": "B2.22",
+      "name": "B2.22 (PM)",
+      "capacity": 60,
+      "floor": "2",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 987,
+      "code": "B3.02",
+      "name": "B3.02 (PM)",
+      "capacity": 40,
+      "floor": "3",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 988,
+      "code": "B3.04",
+      "name": "B3.04 (PM)",
+      "capacity": 40,
+      "floor": "3",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 989,
+      "code": "B3.06",
+      "name": "B3.06 (PM)",
+      "capacity": 40,
+      "floor": "3",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 990,
+      "code": "B3.08",
+      "name": "B3.08 (PM)",
+      "capacity": 40,
+      "floor": "3",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1009,
+      "code": "B3.10",
+      "name": "B3.10",
+      "capacity": 80,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1010,
+      "code": "B3.12",
+      "name": "B3.12",
+      "capacity": 80,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1011,
+      "code": "B3.14",
+      "name": "B3.14",
+      "capacity": 140,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1012,
+      "code": "B3.16",
+      "name": "B3.16",
+      "capacity": 90,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1013,
+      "code": "B3.18",
+      "name": "B3.18",
+      "capacity": 90,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1014,
+      "code": "B3.20",
+      "name": "B3.20",
+      "capacity": 100,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1015,
+      "code": "B3.22",
+      "name": "B3.22",
+      "capacity": 100,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 996,
+      "code": "B4.02",
+      "name": "B4.02 (PM)",
+      "capacity": 40,
+      "floor": "4",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 997,
+      "code": "B4.04",
+      "name": "B4.04 (PM)",
+      "capacity": 40,
+      "floor": "4",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 991,
+      "code": "B4.06",
+      "name": "B4.06 (PM)",
+      "capacity": 40,
+      "floor": "4",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 992,
+      "code": "B4.08",
+      "name": "B4.08 (PM)",
+      "capacity": 40,
+      "floor": "4",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1016,
+      "code": "B4.10",
+      "name": "B4.10",
+      "capacity": 72,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1017,
+      "code": "B4.12",
+      "name": "B4.12",
+      "capacity": 72,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1018,
+      "code": "B4.14",
+      "name": "B4.14",
+      "capacity": 160,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1019,
+      "code": "B4.16",
+      "name": "B4.16",
+      "capacity": 90,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1020,
+      "code": "B4.18",
+      "name": "B4.18",
+      "capacity": 90,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1021,
+      "code": "B4.20",
+      "name": "B4.20",
+      "capacity": 100,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1022,
+      "code": "B4.22",
+      "name": "B4.22",
+      "capacity": 100,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 993,
+      "code": "B5.02",
+      "name": "B5.02 (PM)",
+      "capacity": 64,
+      "floor": "5",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1074,
+      "code": "B5.04",
+      "name": "B5.04 (PM)",
+      "capacity": 50,
+      "floor": "5",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1075,
+      "code": "B5.06",
+      "name": "B5.06 (PM)",
+      "capacity": 50,
+      "floor": "5",
+      "room_type_code": "TH",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1024,
+      "code": "B5.10",
+      "name": "B5.10",
+      "capacity": 90,
+      "floor": "5",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1025,
+      "code": "B5.12",
+      "name": "B5.12",
+      "capacity": 90,
+      "floor": "5",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1026,
+      "code": "B5.14",
+      "name": "B5.14",
+      "capacity": 180,
+      "floor": "5",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1027,
+      "code": "B6.02",
+      "name": "B6.02",
+      "capacity": 80,
+      "floor": "6",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1028,
+      "code": "B6.04",
+      "name": "B6.04",
+      "capacity": 80,
+      "floor": "6",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1029,
+      "code": "B6.06",
+      "name": "B6.06",
+      "capacity": 160,
+      "floor": "6",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1030,
+      "code": "B6.08",
+      "name": "B6.08",
+      "capacity": 90,
+      "floor": "6",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1031,
+      "code": "B6.10",
+      "name": "B6.10",
+      "capacity": 90,
+      "floor": "6",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1032,
+      "code": "B6.12",
+      "name": "B6.12",
+      "capacity": 180,
+      "floor": "6",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1033,
+      "code": "B7.02",
+      "name": "B7.02",
+      "capacity": 160,
+      "floor": "7",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1034,
+      "code": "B7.04",
+      "name": "B7.04",
+      "capacity": 90,
+      "floor": "7",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1035,
+      "code": "B7.06",
+      "name": "B7.06",
+      "capacity": 90,
+      "floor": "7",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1036,
+      "code": "B7.08",
+      "name": "B7.08",
+      "capacity": 220,
+      "floor": "7",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1037,
+      "code": "B8.02",
+      "name": "B8.02",
+      "capacity": 90,
+      "floor": "8",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1038,
+      "code": "B8.04",
+      "name": "B8.04",
+      "capacity": 90,
+      "floor": "8",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1039,
+      "code": "B8.06",
+      "name": "B8.06",
+      "capacity": 90,
+      "floor": "8",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1040,
+      "code": "B8.08",
+      "name": "B8.08",
+      "capacity": 90,
+      "floor": "8",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 1041,
+      "code": "B9.02",
+      "name": "B9.02",
+      "capacity": 120,
+      "floor": "9",
+      "room_type_code": "LT",
+      "place_name": "Nhà B"
+    },
+    {
+      "id": 912,
+      "code": "C104",
+      "name": "C104",
+      "capacity": 170,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 923,
+      "code": "C201",
+      "name": "C201",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 924,
+      "code": "C202",
+      "name": "C202 ",
+      "capacity": 70,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 927,
+      "code": "C205",
+      "name": "C205 (WB)",
+      "capacity": 80,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 928,
+      "code": "C206",
+      "name": "C206",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 929,
+      "code": "C207",
+      "name": "C207 (WB)",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 930,
+      "code": "C208",
+      "name": "C208",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 931,
+      "code": "C209",
+      "name": "C209 (WB)",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 932,
+      "code": "C210",
+      "name": "C210",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 933,
+      "code": "C211",
+      "name": "C211 (WB)",
+      "capacity": 80,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 934,
+      "code": "C212",
+      "name": "C212",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 935,
+      "code": "C213",
+      "name": "C213",
+      "capacity": 120,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 936,
+      "code": "C214",
+      "name": "C214",
+      "capacity": 80,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 938,
+      "code": "C216",
+      "name": "C216",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1051,
+      "code": "C218",
+      "name": "C218",
+      "capacity": 50,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 939,
+      "code": "C301",
+      "name": "C301",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 940,
+      "code": "C302",
+      "name": "C302 ",
+      "capacity": 70,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 942,
+      "code": "C305",
+      "name": "C305 (CLC)",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 943,
+      "code": "C306",
+      "name": "C306",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 944,
+      "code": "C307",
+      "name": "C307",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 945,
+      "code": "C308",
+      "name": "C308",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 946,
+      "code": "C309",
+      "name": "C309",
+      "capacity": 80,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 947,
+      "code": "C310",
+      "name": "C310",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 948,
+      "code": "C311",
+      "name": "C311",
+      "capacity": 80,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 949,
+      "code": "C312",
+      "name": "C312",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1063,
+      "code": "C313",
+      "name": "C313",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1060,
+      "code": "C314",
+      "name": "C314",
+      "capacity": 80,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1061,
+      "code": "C315",
+      "name": "C315",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1059,
+      "code": "C316",
+      "name": "C316",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1062,
+      "code": "C318",
+      "name": "C318",
+      "capacity": 50,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1653,
+      "code": "sanhc",
+      "name": "Sảnh C",
+      "capacity": 100,
+      "floor": "1",
+      "room_type_code": "PH",
+      "place_name": "Nhà C"
+    },
+    {
+      "id": 1652,
+      "code": "E01.1",
+      "name": "E01.1 (Phòng Họp)",
+      "capacity": 25,
+      "floor": "1",
+      "room_type_code": "PH",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 977,
+      "code": "E112",
+      "name": "E11.2",
+      "capacity": 32,
+      "floor": "11",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 978,
+      "code": "E114",
+      "name": "E11.4",
+      "capacity": 32,
+      "floor": "11",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 979,
+      "code": "E116",
+      "name": "E11.6",
+      "capacity": 32,
+      "floor": "11",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 980,
+      "code": "E118",
+      "name": "E11.8",
+      "capacity": 30,
+      "floor": "11",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 958,
+      "code": "E23",
+      "name": "E02.3",
+      "capacity": 30,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 959,
+      "code": "E24",
+      "name": "E02.4",
+      "capacity": 48,
+      "floor": "2",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 961,
+      "code": "E32",
+      "name": "E03.2",
+      "capacity": 48,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 962,
+      "code": "E33",
+      "name": "E03.3",
+      "capacity": 30,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 963,
+      "code": "E34",
+      "name": "E03.4",
+      "capacity": 48,
+      "floor": "3",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 965,
+      "code": "E42",
+      "name": "E04.2",
+      "capacity": 48,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 966,
+      "code": "E43",
+      "name": "E04.3",
+      "capacity": 30,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 967,
+      "code": "E44",
+      "name": "E04.4",
+      "capacity": 48,
+      "floor": "4",
+      "room_type_code": "LT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 968,
+      "code": "HTE",
+      "name": "HTE (Hội trường E12)",
+      "capacity": 200,
+      "floor": "12",
+      "room_type_code": "HT",
+      "place_name": "Nhà E"
+    },
+    {
+      "id": 1073,
+      "code": "Phongbongban",
+      "name": "Phòng Bóng Bàn",
+      "capacity": 50,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Sân tập"
+    },
+    {
+      "id": 1054,
+      "code": "Sanbongchuyen",
+      "name": "Sân Bóng Chuyền",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "HT",
+      "place_name": "Sân tập"
+    },
+    {
+      "id": 1053,
+      "code": "Sanbongda",
+      "name": "Sân Bóng Đá",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "HT",
+      "place_name": "Sân tập"
+    },
+    {
+      "id": 1055,
+      "code": "Sanbongro",
+      "name": "Sân Bóng Rổ",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "HT",
+      "place_name": "Sân tập"
+    },
+    {
+      "id": 1648,
+      "code": "SanPickleball_01",
+      "name": "Sân Pickleball 01 (sân cũ)",
+      "capacity": 100,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Sân tập"
+    },
+    {
+      "id": 1649,
+      "code": "SanPickleball_02",
+      "name": "Sân Pickleball 02 (sân mới)",
+      "capacity": 100,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Sân tập"
+    },
+    {
+      "id": 1650,
+      "code": "SanPickleball_03",
+      "name": "Sân Pickleball 03 (sân mới)",
+      "capacity": 100,
+      "floor": "1",
+      "room_type_code": "LT",
+      "place_name": "Sân tập"
+    },
+    {
+      "id": 1057,
+      "code": "Sanvothuat",
+      "name": "Sân Võ Thuật",
+      "capacity": 60,
+      "floor": "1",
+      "room_type_code": "HT",
+      "place_name": "Sân tập"
+    }
+  ]
+}
