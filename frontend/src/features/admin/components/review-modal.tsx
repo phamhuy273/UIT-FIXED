@@ -8,7 +8,15 @@ import { urgencyLabels, type IncidentReport, type Urgency } from '@/features/inc
 import { reviewReport } from '../api/admin-review.api';
 import type { ReviewInput } from '../types/admin.types';
 
-export function ReviewModal({ report, onClose }: { report: IncidentReport; onClose: () => void }) {
+export function ReviewModal({
+  report,
+  onClose,
+  onApproved,
+}: {
+  report: IncidentReport;
+  onClose: () => void;
+  onApproved?: (approvedReport: IncidentReport) => void;
+}) {
   const categories = useCategories();
   const queryClient = useQueryClient();
   const [categoryId, setCategoryId] = useState(report.categoryId);
@@ -19,9 +27,14 @@ export function ReviewModal({ report, onClose }: { report: IncidentReport; onClo
 
   const mutation = useMutation({
     mutationFn: (input: ReviewInput) => reviewReport(report.id, input),
-    onSuccess: async () => {
+    onSuccess: async (data, variables) => {
       await queryClient.invalidateQueries({ queryKey: ['reports'], refetchType: 'all' });
-      onClose();
+      await queryClient.invalidateQueries({ queryKey: ['incidents'], refetchType: 'all' });
+      if (variables.action === 'APPROVE' && onApproved) {
+        onApproved(data);
+      } else {
+        onClose();
+      }
     },
     onError: () => {
       void queryClient.invalidateQueries({ queryKey: ['reports'] });
@@ -77,7 +90,7 @@ export function ReviewModal({ report, onClose }: { report: IncidentReport; onClo
                 if (urgency) mutation.mutate({ action: 'APPROVE', categoryId, urgency });
               }}
             >
-              {mutation.isPending ? 'Đang phê duyệt...' : 'Phê duyệt'}
+              {mutation.isPending ? 'Đang phê duyệt...' : 'Phê duyệt & Phân công KTV'}
             </button>
           </>
         )

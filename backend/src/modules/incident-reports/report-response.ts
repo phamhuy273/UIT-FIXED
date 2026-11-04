@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 export const reportInclude = {
   student: { select: { id: true, fullName: true, email: true } },
   category: { select: { id: true, name: true } },
-  building: { select: { id: true, name: true } },
+  building: { select: { id: true, name: true, defaultDepartmentId: true } },
   location: { select: { id: true, name: true, floor: { select: { id: true, name: true } } } },
   media: { select: { id: true, url: true, publicId: true }, orderBy: { id: 'asc' } },
   histories: {
