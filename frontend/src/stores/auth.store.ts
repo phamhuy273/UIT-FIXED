@@ -1,38 +1,82 @@
 import { create } from 'zustand';
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatarUrl?: string;
-  role: string;
-}
+import { getCurrentUser } from '@/features/auth/api/auth.api';
+import { isUnauthorized } from '@/features/auth/lib/api-error';
+import { clearAccessToken, readAccessToken, writeAccessToken } from '@/features/auth/lib/token-storage';
+import { setUnauthorizedHandler } from '@/lib/axios';
+import type { AuthUser, SessionStatus } from '@/features/auth/types/auth.types';
 
 interface AuthState {
-  user: User | null;
+  status: SessionStatus;
+  user: AuthUser | null;
   token: string | null;
-  isAuthenticated: boolean;
-  setUser: (user: User | null) => void;
-  setToken: (token: string | null) => void;
-  logout: () => void;
+  initialize: () => Promise<void>;
+  retry: () => Promise<void>;
+  establishSession: (token: string, user: AuthUser) => void;
+  clearSession: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: localStorage.getItem('access_token'),
-  isAuthenticated: !!localStorage.getItem('access_token'),
+let boot: Promise<void> | null = null;
+let generation = 0;
 
-  setUser: (user) => set({ user, isAuthenticated: !!user }),
-  setToken: (token) => {
-    if (token) {
-      localStorage.setItem('access_token', token);
-    } else {
-      localStorage.removeItem('access_token');
+async function loadSession(set: (partial: Partial<AuthState>) => void) {
+  const run = generation;
+  const token = readAccessToken();
+  if (!token) {
+    if (generation === run) {
+      set({ status: 'anonymous', user: null, token: null });
     }
-    set({ token, isAuthenticated: !!token });
+    return;
+  }
+
+  set({ status: 'loading', token, user: null });
+  try {
+    const user = await getCurrentUser();
+    if (generation !== run) {
+      return;
+    }
+    set({ status: 'authenticated', user, token });
+  } catch (error) {
+    if (generation !== run) {
+      return;
+    }
+    if (isUnauthorized(error)) {
+      clearAccessToken();
+      set({ status: 'anonymous', user: null, token: null });
+      return;
+    }
+    set({ status: 'error', user: null, token });
+  }
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
+  status: 'loading',
+  user: null,
+  token: null,
+
+  initialize: () => {
+    boot ??= loadSession(set);
+    return boot;
   },
-  logout: () => {
-    localStorage.removeItem('access_token');
-    set({ user: null, token: null, isAuthenticated: false });
+
+  retry: () => {
+    boot = null;
+    generation += 1;
+    return get().initialize();
+  },
+
+  establishSession: (token, user) => {
+    generation += 1;
+    writeAccessToken(token);
+    set({ status: 'authenticated', token, user });
+  },
+
+  clearSession: () => {
+    generation += 1;
+    clearAccessToken();
+    set({ status: 'anonymous', token: null, user: null });
   },
 }));
+
+setUnauthorizedHandler(() => {
+  useAuthStore.getState().clearSession();
+});
