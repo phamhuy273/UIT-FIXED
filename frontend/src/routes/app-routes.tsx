@@ -8,6 +8,7 @@ import { GuestRoute, ProtectedRoute } from './protected-route';
 import { WorkspaceLayout } from '@/components/layout/workspace-layout';
 import { ReportForm, ReportList } from '@/features/incident-reports';
 import { PendingQueueTable } from '@/features/admin';
+import { StaffWorkspace } from '@/features/staff/components/staff-workspace';
 
 export const router = createBrowserRouter([
   {
@@ -28,13 +29,17 @@ export const router = createBrowserRouter([
   {
     element: <ProtectedRoute allow={['ADMIN']} />,
     children: [{ element: <WorkspaceLayout scope="admin" />, children: [
-      { path: '/admin', element: <PendingQueueTable /> },
+      { path: '/admin', lazy: async () => ({ Component: (await import('@/features/admin/components/admin-dashboard')).AdminDashboard }) },
+      { path: '/admin/queue', element: <PendingQueueTable /> },
       { path: '/admin/account', element: <AccountDesk scope="admin" /> },
     ] }],
   },
   {
     element: <ProtectedRoute allow={['TECH_STAFF']} />,
-    children: [{ path: '/staff', element: <AccountDesk scope="staff" /> }],
+    children: [{ element: <WorkspaceLayout scope="staff" />, children: [
+      { path: '/staff', element: <StaffWorkspace /> },
+      { path: '/staff/account', element: <AccountDesk scope="staff" /> },
+    ] }],
   },
   { element: <ProtectedRoute allow={['STUDENT', 'ADMIN', 'TECH_STAFF']} />, children: [{ path: '/media', element: <MediaPage /> }] },
   { path: '*', element: <MissingPage /> },

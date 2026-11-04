@@ -14,6 +14,34 @@ export function normalizeEmail(value: string): string {
   return value.trim().toLowerCase();
 }
 
+export function studentLocalPart(value: string): string {
+  const email = normalizeEmail(value);
+  const suffix = `@${UIT_STUDENT_EMAIL_DOMAIN}`;
+  return email.endsWith(suffix) ? email.slice(0, -suffix.length) : value;
+}
+
+export function composeStudentEmail(localPart: string): string {
+  const value = normalizeEmail(localPart);
+  if (!value || value.includes('@')) {
+    return value;
+  }
+  return `${value}@${UIT_STUDENT_EMAIL_DOMAIN}`;
+}
+
+export function loginEmailError(value: string): string | null {
+  const email = normalizeEmail(value);
+  if (!email) {
+    return 'Nhập email đăng nhập.';
+  }
+  const atIndex = email.indexOf('@');
+  const shaped =
+    atIndex > 0 && atIndex === email.lastIndexOf('@') && atIndex < email.length - 1 && !/\s/.test(email);
+  if (!shaped) {
+    return INVALID_EMAIL_MESSAGE;
+  }
+  return null;
+}
+
 export function emailError(value: string): string | null {
   const email = normalizeEmail(value);
   if (!email) {
