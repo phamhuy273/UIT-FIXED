@@ -118,7 +118,8 @@ No merge, linked canonical report, new lifecycle status, bulk rejection or extra
 migration is introduced by this admin feature.
 
 `GET /api/v1/incident-reports/pending-groups` is ADMIN-only, accepts the existing
-validated page/limit/building filter and returns groups before pagination. It
+validated page/limit/building/floor filters and returns only groups with at least
+two similar reports, filtering out single reports before pagination. It
 considers up to 200 pending reports ordered by urgency and oldest first. A group
 requires the same room, category and recurrence reference, plus pairwise semantic
 similarity above the configured threshold. Complete-link grouping avoids a chain
@@ -135,7 +136,9 @@ The choice of comparison report never changes the data or creates shared trackin
 
 Groups are suggestions, not persisted duplicate verdicts. Refresh/review recomputes
 them; a remaining pending report can be suggested again until individually processed.
-AI failure/busy/timeout displays individual reports, preserving all existing actions.
+Single reports remain available in “Danh sách thường”. If a review leaves only one
+pending member, that group disappears from the grouped view. AI failure/busy/timeout
+shows a notice linking to the ordinary list rather than displaying single reports.
 Only one admin grouping job is allowed in flight per process, cached for identical
 snapshots, with a 5s response deadline; unfinished work stays tracked. If more than
 200 pending reports match, the UI explicitly shows partial coverage and provides

@@ -224,19 +224,23 @@ describe('Student duplicate warning and shared tracking HTTP', () => {
       title: 'Máy chiếu hiển thị mờ', description: 'khác triệu chứng hình ảnh mờ', urgency: 'HIGH' } });
     const url = `/api/v1/incident-reports/pending-groups?buildingId=${f.report.buildingId}&limit=1`;
     const result = await request(app.getHttpServer()).get(url).auth(tokens[3], { type: 'bearer' }).expect(200);
-    expect(result.body.data).toMatchObject({ total: 2, totalReports: 3, totalPages: 2, availability: 'ready' });
+    expect(result.body.data).toMatchObject({ total: 1, totalReports: 3, totalPages: 1, availability: 'ready' });
     expect(result.body.data.items[0]).toMatchObject({ kind: 'SIMILAR', urgency: 'CRITICAL' });
     expect(result.body.data.items[0].reports.map((r: { id: number }) => r.id).sort()).toEqual([f.report.id, similar.id].sort());
     expect(await db.incidentReport.count({ where: { buildingId: f.report.buildingId, status: 'PENDING' } })).toBe(3);
     expect(await db.incident.count({ where: { reportId: { in: [f.report.id, similar.id] } } })).toBe(0);
     const second = await request(app.getHttpServer()).get(url + '&page=2').auth(tokens[3], { type: 'bearer' }).expect(200);
-    expect(second.body.data.items[0].kind).toBe('SINGLE');
+    expect(second.body.data.items).toEqual([]);
+    expect(second.body.data).toMatchObject({ total: 1, totalPages: 1 });
+    const ordinary = await request(app.getHttpServer()).get(`/api/v1/incident-reports/pending?buildingId=${f.report.buildingId}`)
+      .auth(tokens[3], { type: 'bearer' }).expect(200);
+    expect(ordinary.body.data.total).toBe(3);
     // Each report still goes through the original, individually authorized review.
     await request(app.getHttpServer()).patch(`/api/v1/incident-reports/${similar.id}/review`).auth(tokens[3], { type: 'bearer' })
       .send({ action: 'REJECT', reason: `Trùng với báo cáo ${f.report.id} sau khi đối chiếu.` }).expect(200);
     const updated = await request(app.getHttpServer()).get(url).auth(tokens[3], { type: 'bearer' }).expect(200);
     expect(updated.body.data.totalReports).toBe(2);
-    expect(updated.body.data.items[0].kind).toBe('SINGLE');
+    expect(updated.body.data).toMatchObject({ items: [], total: 0, totalPages: 0 });
     expect(await db.incidentReport.findUniqueOrThrow({ where: { id: f.report.id } })).toMatchObject({ status: 'PENDING' });
     expect(await db.incidentReportHistory.count({ where: { reportId: similar.id, action: 'REJECTED' } })).toBe(1);
   });
@@ -251,8 +255,11 @@ describe('Student duplicate warning and shared tracking HTTP', () => {
       title: 'OFFLINE model unavailable', description: 'Temporary grouping model failure.' } });
     const result = await request(app.getHttpServer()).get(`/api/v1/incident-reports/pending-groups?buildingId=${f.report.buildingId}`)
       .auth(tokens[3], { type: 'bearer' }).expect(200);
-    expect(result.body.data).toMatchObject({ availability: 'unavailable', totalReports: 2, total: 2 });
-    expect(result.body.data.items.every((group: { kind: string }) => group.kind === 'SINGLE')).toBe(true);
+    expect(result.body.data).toMatchObject({ availability: 'unavailable', totalReports: 2, total: 0, totalPages: 0, items: [] });
+    const ordinary = await request(app.getHttpServer()).get(`/api/v1/incident-reports/pending?buildingId=${f.report.buildingId}`)
+      .auth(tokens[3], { type: 'bearer' }).expect(200);
+    expect(ordinary.body.data.items).toHaveLength(2);
+    expect(ordinary.body.data.total).toBe(2);
   });
   it('filters all three admin queues by building AND floor without mixing equal floor numbers across buildings', async () => {
     const f = await fixture();
@@ -266,6 +273,10 @@ describe('Student duplicate warning and shared tracking HTTP', () => {
     await db.incidentReport.create({ data: { studentId: users[0], buildingId: f.report.buildingId, locationId: location2.id, categoryId,
       title: 'Floor filtering fixture', description: 'Temporary floor filtering report.' } });
     for (const [buildingId, locationId] of [[f.report.buildingId, f.report.locationId], [f.report.buildingId, location2.id], [other.report.buildingId, other.report.locationId]]) {
+      // Two compatible pending reports per room exercise non-empty groups, not
+      // a vacuous match after the grouped view excludes single reports.
+      await db.incidentReport.create({ data: { studentId: users[1], buildingId, locationId, categoryId,
+        title: 'Matching floor fixture', description: 'Compatible pending report for the same classroom.' } });
       const report = await db.incidentReport.create({ data: { studentId: users[0], buildingId, locationId, categoryId,
         title: 'Dispatch filtering fixture', description: 'Temporary dispatch filtering report.', urgency: 'HIGH' } });
       await request(app.getHttpServer()).patch(`/api/v1/incident-reports/${report.id}/review`).auth(tokens[3], { type: 'bearer' })
@@ -274,7 +285,7 @@ describe('Student duplicate warning and shared tracking HTTP', () => {
     for (const path of ['/incident-reports/pending', '/incident-reports/pending-groups', '/incidents/queue']) {
       const response = await request(app.getHttpServer()).get(`/api/v1${path}?buildingId=${f.report.buildingId}&floorId=${floor1.id}`)
         .auth(tokens[3], { type: 'bearer' }).expect(200);
-      expect(response.body.data.total).toBe(1);
+      expect(response.body.data.total).toBe(path === '/incident-reports/pending' ? 2 : 1);
       const reports = response.body.data.items.flatMap((item: { reports?: unknown[]; report?: unknown }) => item.reports ?? [item.report ?? item]);
       expect(reports.every((report: { building: { id: number }; location: { floor: { id: number } } }) =>
         report.building.id === f.report.buildingId && report.location.floor.id === floor1.id)).toBe(true);
@@ -285,7 +296,7 @@ describe('Student duplicate warning and shared tracking HTTP', () => {
       await request(app.getHttpServer()).get(`/api/v1${path}?floorId=1abc`).auth(tokens[3], { type: 'bearer' }).expect(400);
       const allFloors = await request(app.getHttpServer()).get(`/api/v1${path}?buildingId=${f.report.buildingId}`)
         .auth(tokens[3], { type: 'bearer' }).expect(200);
-      expect(allFloors.body.data.total).toBe(2);
+      expect(allFloors.body.data.total).toBe(path === '/incident-reports/pending' ? 4 : 2);
     }
   });
 });

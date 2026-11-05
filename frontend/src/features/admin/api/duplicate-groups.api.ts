@@ -3,7 +3,7 @@ import type { ApiResponse } from '@/types/api.type';
 import type { IncidentReport, Urgency } from '@/features/incident-reports/types/incident-report.types';
 
 export interface PendingGroup {
-  id: string; kind: 'SIMILAR' | 'SINGLE'; referenceId: number; urgency: Urgency | null; reports: IncidentReport[];
+  id: string; kind: 'SIMILAR'; referenceId: number; urgency: Urgency | null; reports: IncidentReport[];
 }
 export interface PendingGroupsPage {
   items: PendingGroup[]; total: number; totalReports: number; consideredReports: number;

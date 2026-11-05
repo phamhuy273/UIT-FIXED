@@ -54,10 +54,12 @@ export class AdminDuplicateGroupsService {
     } else if (candidates.length) availability = 'unavailable';
     const configured = Number(process.env.AI_DUPLICATE_THRESHOLD ?? '0.80');
     const threshold = Number.isFinite(configured) && configured >= 0 && configured <= 1 ? configured : 0.80;
-    const grouped = groupReports(reports, vectors, threshold);
+    // This view contains duplicate suggestions only. Filter before pagination so
+    // single reports cannot occupy pages or inflate the number of groups.
+    const grouped = groupReports(reports, vectors, threshold).filter((members) => members.length > 1);
     const items = grouped.slice((query.page - 1) * query.limit, query.page * query.limit).map((members) => ({
       id: `group-${members.map((report) => report.id).sort((a, b) => a - b).join('-')}`,
-      kind: members.length > 1 ? 'SIMILAR' : 'SINGLE',
+      kind: 'SIMILAR',
       // A display reference only, never a merged/canonical Report.
       referenceId: members[0].id, urgency: members[0].urgency,
       reports: members.map(presentReport),

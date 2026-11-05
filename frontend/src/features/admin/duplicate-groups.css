@@ -1,5 +1,5 @@
 .admin-duplicate-groups > p { font-size: 14px; margin: 12px 0; }
-.admin-duplicate-group, .admin-duplicate-single { border: 1px solid var(--border); border-radius: 12px; margin-block: 14px; }
+.admin-duplicate-group { border: 1px solid var(--border); border-radius: 12px; margin-block: 14px; }
 .admin-duplicate-group summary { padding: 16px; cursor: pointer; }
 .admin-duplicate-group summary > span:not(.badge) { display: block; margin: 5px 0; overflow-wrap: anywhere; }
 .admin-group-title { font-weight: 600; }
@@ -10,7 +10,6 @@
 .admin-group-report { padding: 20px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface, #fff); }
 .admin-group-members .admin-group-report { margin-top: 16px; }
 .admin-group-report.is-reference { border-color: var(--primary); }
-.admin-duplicate-single .admin-group-report { border: 0; }
 .admin-group-report header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 .admin-report-heading { min-width: 0; flex: 1; }
 .admin-report-heading h3 { margin: 6px 0 10px; font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }

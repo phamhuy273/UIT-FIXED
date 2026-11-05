@@ -20,20 +20,24 @@ export function GroupedPendingReports({ buildingId, floorId, onReview, onShowAll
     queryFn: ({ signal }) => getPendingGroups(page, buildingId, floorId, signal), refetchInterval: 30_000,
   });
   return <section className="admin-duplicate-groups" aria-label="Nhóm báo cáo có thể trùng lặp">
-    <p>AI chỉ gợi ý nhóm tương tự. Bạn vẫn duyệt hoặc từ chối từng báo cáo.</p>
+    <p>Chỉ hiển thị nhóm có từ 2 báo cáo tương tự. Bạn vẫn duyệt hoặc từ chối từng báo cáo.</p>
     {query.isPending && <p role="status">Đang kiểm tra và gom báo cáo tương tự…</p>}
     {query.isError && <div role="alert"><p>Không tải được nhóm báo cáo.</p><Button variant="outline" onClick={() => { void query.refetch(); }}>Thử lại</Button> <Button variant="ghost" onClick={onShowAll}>Xem danh sách thường</Button></div>}
     {query.data && <>
-      <p role="status">{query.data.totalReports} báo cáo chờ duyệt · {query.data.total} mục trong phạm vi đang xem</p>
-      {query.data.availability === 'unavailable' && <p role="status">AI đang bận hoặc chưa sẵn sàng. Các báo cáo vẫn được hiển thị riêng để bạn xử lý.</p>}
+      <p role="status">{query.data.total} nhóm báo cáo tương tự · {query.data.totalReports} báo cáo chờ duyệt trong phạm vi đang xem</p>
+      {query.data.availability === 'unavailable' && <div role="status">
+        <p>AI đang bận hoặc chưa sẵn sàng. Mở danh sách thường để xem và xử lý các báo cáo.</p>
+        <Button variant="ghost" onClick={onShowAll}>Xem danh sách thường</Button>
+      </div>}
       {query.data.consideredReports < query.data.totalReports && <div role="status">
         <p>Đang gom {query.data.consideredReports}/{query.data.totalReports} báo cáo ưu tiên đầu tiên. Mở danh sách thường để xem toàn bộ.</p>
         <Button variant="ghost" onClick={onShowAll}>Xem toàn bộ báo cáo</Button>
       </div>}
-      {query.data.items.map((group) => group.kind === 'SIMILAR'
-        ? <SimilarGroup key={group.id} group={group} onReview={onReview} />
-        : <div className="admin-duplicate-single" key={group.id}><ReportEntry report={group.reports[0]} onReview={onReview} /></div>)}
-      {!query.data.total && <p>Không có báo cáo chờ duyệt trong phạm vi này.</p>}
+      {query.data.items.map((group) => <SimilarGroup key={group.id} group={group} onReview={onReview} />)}
+      {!query.data.total && query.data.availability !== 'unavailable' && <div>
+        <p>Chưa tìm thấy nhóm báo cáo tương tự trong phạm vi đã kiểm tra. Báo cáo đơn lẻ nằm ở danh sách thường.</p>
+        <Button variant="ghost" onClick={onShowAll}>Xem danh sách thường</Button>
+      </div>}
       {!query.data.items.length && page > 1 && <Button variant="outline" onClick={() => setPage((current) => Math.max(1, current - 1))}>Về trang trước</Button>}
       <ReportPagination page={page} totalPages={query.data.totalPages} onChange={setPage} loading={query.isFetching} />
     </>}
