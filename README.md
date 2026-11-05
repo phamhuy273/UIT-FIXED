@@ -133,10 +133,10 @@ cd UIT-FIXED
 git fetch origin
 
 # Khi tính năng AI chưa được merge vào main, dùng branch có đủ code AI:
-git switch --track origin/feat/US-00-admin-duplicate-triage
+git switch --track origin/feat/admin-duplicate-triage
 ```
 
-Nếu đã có branch local, dùng `git switch feat/US-00-admin-duplicate-triage` rồi
+Nếu đã có branch local, dùng `git switch feat/admin-duplicate-triage` rồi
 `git pull --ff-only`. Khi AI đã được merge, có thể dùng branch tích hợp của nhóm.
 GitHub chỉ cung cấp source; không tự cài thư viện, chạy migration hay tải model trên máy khác.
 
