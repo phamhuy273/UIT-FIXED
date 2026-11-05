@@ -1,4 +1,57 @@
 # UIT-FIXED
+
+## Kiến trúc hệ thống (System Architecture)
+
+```mermaid
+flowchart TB
+    People["Sinh viên / Admin / Kỹ thuật viên"]
+
+    subgraph Browser["Trình duyệt"]
+        Web["React + TypeScript + Vite<br/>React Router / TanStack Query / Zustand"]
+    end
+
+    subgraph Backend["NestJS backend — Modular Monolith"]
+        API["REST API /api/v1<br/>JWT authentication / RBAC / DTO validation"]
+        Accounts["Auth / Users<br/>Tài khoản và phân quyền"]
+        Master["Master Data<br/>Tòa / Tầng / Phòng / Danh mục / Phòng ban"]
+        Reports["Incident Reports<br/>Tiếp nhận / Duyệt / Phân công / Tiến độ / Khắc phục"]
+        Media["Media<br/>Kiểm tra quyền và tải ảnh"]
+        Duplicates["Duplicate Detection<br/>Lọc cùng phòng và danh mục<br/>So sánh nội dung và xét thời gian"]
+        Model["Embedding model chạy trên CPU cục bộ<br/>Transformers.js / multilingual MiniLM<br/>384 chiều / cosine similarity"]
+        Cache["Cache model trên máy backend<br/>.cache/models"]
+        Prisma["Prisma ORM<br/>Truy vấn / Transaction"]
+
+        API --> Accounts
+        API --> Master
+        API --> Reports
+        API --> Media
+        Accounts --> Prisma
+        Master --> Prisma
+        Reports --> Prisma
+        Media --> Prisma
+        Reports --> Duplicates
+        Duplicates --> Prisma
+        Duplicates --> Model
+        Model --> Cache
+    end
+
+    DB[("PostgreSQL 16<br/>Users / Departments / Locations<br/>Reports / Incidents / Assignments / Histories<br/>Media metadata / Confirmations / Embeddings")]
+    Cloudinary["Cloudinary<br/>Lưu ảnh và phân phối qua CDN"]
+    Hub["Hugging Face model repository<br/>Nguồn tải tệp model"]
+
+    People --> Web
+    Web -->|"HTTP JSON + Bearer JWT"| API
+    Prisma --> DB
+    Media -->|"Upload ảnh qua backend"| Cloudinary
+    Cloudinary -.->|"Hiển thị ảnh bằng URL"| Web
+    Hub -.->|"Tải tệp khi chưa có cache, nếu cho phép online"| Cache
+```
+
+- **Backend là một ứng dụng NestJS** với các module nội bộ, chưa tách thành microservices. Backend thực thi quyền truy cập và quy tắc nghiệp vụ.
+- **Report và Incident tách biệt:** sinh viên gửi Report; Admin phê duyệt để tạo Incident, sau đó phân công KTV xử lý. Prisma dùng transaction cho các thao tác cần cập nhật nhiều bản ghi nhất quán.
+- **AI suy luận cục bộ trên backend**, không gửi nội dung báo cáo đến API suy luận bên ngoài. Kết nối tới Hugging Face dùng để tải tệp model; có thể chạy offline khi đã có cache. Model: `Xenova/paraphrase-multilingual-MiniLM-L12-v2`.
+- **AI chỉ gợi ý:** sinh viên vẫn có thể gửi báo cáo; Admin xem nhóm tương tự và duyệt hoặc từ chối từng báo cáo riêng. PostgreSQL lưu embedding dạng mảng số, không yêu cầu pgvector.
+
 > Hệ Thống Quản Lý Vòng Đời Sự Cố (Ticketing System) Nội Bộ Dành Riêng Cho Trường Học
 
 - **Khóa học:** AI-Driven Software Development with Scrum Training Course (University of Information Technology - UIT & Axon Active)
