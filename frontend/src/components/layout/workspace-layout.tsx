@@ -2,7 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth.store';
 import { MainLayout } from './main-layout';
-import { LayoutDashboard, Inbox, FilePlus2, FileText, User, LogOut, Wrench, Tags, Network } from 'lucide-react';
+import { LayoutDashboard, Inbox, FilePlus2, FileText, User, LogOut, Wrench, Tags, Network, GraduationCap } from 'lucide-react';
 import { roleLabel } from '@/features/auth/lib/auth-rules';
 
 export function WorkspaceLayout({ scope }: { scope: 'student' | 'admin' | 'staff' }) {
@@ -24,6 +24,8 @@ export function WorkspaceLayout({ scope }: { scope: 'student' | 'admin' | 'staff
       { id: '/admin/queue', label: 'Hàng đợi chờ duyệt', icon: <Inbox size={18} strokeWidth={1.75} /> },
       { id: '/admin/categories', label: 'Danh mục sự cố', icon: <Tags size={18} strokeWidth={1.75} /> },
       { id: '/admin/departments', label: 'Phòng ban', icon: <Network size={18} strokeWidth={1.75} /> },
+      { id: '/admin/students', label: 'Sinh viên', icon: <GraduationCap size={18} strokeWidth={1.75} /> },
+      { id: '/admin/staff', label: 'Kỹ thuật viên', icon: <Wrench size={18} strokeWidth={1.75} /> },
       { id: '/admin/account', label: 'Tài khoản', icon: <User size={18} strokeWidth={1.75} /> },
     ];
   } else if (scope === 'staff') {

@@ -38,6 +38,63 @@ export interface AdminDepartmentDetail extends AdminDepartment { staff: Departme
 export interface DepartmentInput { name: string; description: string | null; }
 export type DepartmentUpdate = Partial<DepartmentInput> & { isActive?: boolean };
 
+export interface AdminStudent {
+  id: number;
+  email: string;
+  fullName: string | null;
+  role: Role;
+  avatarUrl: string | null;
+  departmentId: number | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  referenceCount: number;
+}
+export interface StudentInput {
+  fullName: string;
+  email: string;
+  password: string;
+}
+export interface StudentUpdate {
+  fullName?: string;
+  email?: string;
+  isActive?: boolean;
+  password?: string;
+}
+
+export interface AdminStaffDepartment {
+  id: number;
+  name: string;
+  isActive: boolean;
+}
+export interface AdminStaff {
+  id: number;
+  email: string;
+  fullName: string | null;
+  role: Role;
+  avatarUrl: string | null;
+  departmentId: number | null;
+  department: AdminStaffDepartment | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  referenceCount: number;
+  openAssignmentCount: number;
+}
+export interface StaffInput {
+  fullName: string;
+  email: string;
+  password: string;
+  departmentId: number;
+}
+export interface StaffUpdate {
+  fullName?: string;
+  email?: string;
+  isActive?: boolean;
+  password?: string;
+  departmentId?: number;
+}
+
 export type StatsRange = 7 | 30 | 90;
 export type StatsScope = 'active' | 'approved';
 export type IncidentStatus = NonNullable<IncidentReport['incident']>['status'];
