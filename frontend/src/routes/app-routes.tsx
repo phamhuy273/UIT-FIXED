@@ -31,6 +31,7 @@ export const router = createBrowserRouter([
     children: [{ element: <WorkspaceLayout scope="admin" />, children: [
       { path: '/admin', lazy: async () => ({ Component: (await import('@/features/admin/components/admin-dashboard')).AdminDashboard }) },
       { path: '/admin/queue', element: <PendingQueueTable /> },
+      { path: '/admin/categories', lazy: async () => ({ Component: (await import('@/features/admin/components/category-manager')).CategoryManager }) },
       { path: '/admin/account', element: <AccountDesk scope="admin" /> },
     ] }],
   },
