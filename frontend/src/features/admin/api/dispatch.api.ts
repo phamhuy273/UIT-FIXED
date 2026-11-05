@@ -93,6 +93,7 @@ export async function getDepartmentStaff(departmentId: number): Promise<StaffMem
 export async function getIncidentsQueue(params: {
   status?: string;
   buildingId?: number;
+  floorId?: number;
   page?: number;
   limit?: number;
 }): Promise<IncidentQueueResponse> {

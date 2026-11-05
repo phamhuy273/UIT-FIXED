@@ -110,13 +110,16 @@ export function presentIncident(inc: any) {
 export class IncidentAssignmentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getIncidentsQueue(query: { status?: IncidentStatus; buildingId?: number; page?: number; limit?: number }) {
+  async getIncidentsQueue(query: { status?: IncidentStatus; buildingId?: number; floorId?: number; page?: number; limit?: number }) {
     const page = Math.max(1, query.page ?? 1);
     const limit = Math.min(100, Math.max(1, query.limit ?? 10));
 
     const where: Prisma.IncidentWhereInput = {
       ...(query.status ? { status: query.status } : {}),
-      ...(query.buildingId ? { report: { buildingId: query.buildingId } } : {}),
+      ...((query.buildingId || query.floorId) ? { report: {
+        ...(query.buildingId ? { buildingId: query.buildingId } : {}),
+        ...(query.floorId ? { location: { floorId: query.floorId } } : {}),
+      } } : {}),
     };
 
     const [items, total] = await this.prisma.$transaction([

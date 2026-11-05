@@ -58,6 +58,7 @@ describe('Student duplicate warning and shared tracking HTTP', () => {
         db.incidentReportHistory.deleteMany({ where: { reportId: { in: reportIds } } }),
         db.incidentReport.deleteMany({ where: { id: { in: reportIds } } }),
         db.location.deleteMany({ where: { id: { in: locations } } }),
+        db.floor.deleteMany({ where: { buildingId: { in: buildings } } }),
         db.building.deleteMany({ where: { id: { in: buildings } } }),
         db.category.deleteMany({ where: { id: { in: [categoryId ?? -1, ...extraCategories] } } }),
         db.user.deleteMany({ where: { id: { in: users } } }),
@@ -252,5 +253,39 @@ describe('Student duplicate warning and shared tracking HTTP', () => {
       .auth(tokens[3], { type: 'bearer' }).expect(200);
     expect(result.body.data).toMatchObject({ availability: 'unavailable', totalReports: 2, total: 2 });
     expect(result.body.data.items.every((group: { kind: string }) => group.kind === 'SINGLE')).toBe(true);
+  });
+  it('filters all three admin queues by building AND floor without mixing equal floor numbers across buildings', async () => {
+    const f = await fixture();
+    const other = await fixture();
+    const floor1 = await db.floor.create({ data: { buildingId: f.report.buildingId, name: 'Test floor 1', floorNumber: 1 } });
+    const floor2 = await db.floor.create({ data: { buildingId: f.report.buildingId, name: 'Test floor 2', floorNumber: 2 } });
+    const otherFloor1 = await db.floor.create({ data: { buildingId: other.report.buildingId, name: 'Test floor 1', floorNumber: 1 } });
+    await db.location.update({ where: { id: f.report.locationId }, data: { floorId: floor1.id } });
+    await db.location.update({ where: { id: other.report.locationId }, data: { floorId: otherFloor1.id } });
+    const location2 = await db.location.create({ data: { buildingId: f.report.buildingId, floorId: floor2.id, name: `${prefix}-floor2`, locationType: 'LT' } }); locations.push(location2.id);
+    await db.incidentReport.create({ data: { studentId: users[0], buildingId: f.report.buildingId, locationId: location2.id, categoryId,
+      title: 'Floor filtering fixture', description: 'Temporary floor filtering report.' } });
+    for (const [buildingId, locationId] of [[f.report.buildingId, f.report.locationId], [f.report.buildingId, location2.id], [other.report.buildingId, other.report.locationId]]) {
+      const report = await db.incidentReport.create({ data: { studentId: users[0], buildingId, locationId, categoryId,
+        title: 'Dispatch filtering fixture', description: 'Temporary dispatch filtering report.', urgency: 'HIGH' } });
+      await request(app.getHttpServer()).patch(`/api/v1/incident-reports/${report.id}/review`).auth(tokens[3], { type: 'bearer' })
+        .send({ action: 'APPROVE', urgency: 'HIGH' }).expect(200);
+    }
+    for (const path of ['/incident-reports/pending', '/incident-reports/pending-groups', '/incidents/queue']) {
+      const response = await request(app.getHttpServer()).get(`/api/v1${path}?buildingId=${f.report.buildingId}&floorId=${floor1.id}`)
+        .auth(tokens[3], { type: 'bearer' }).expect(200);
+      expect(response.body.data.total).toBe(1);
+      const reports = response.body.data.items.flatMap((item: { reports?: unknown[]; report?: unknown }) => item.reports ?? [item.report ?? item]);
+      expect(reports.every((report: { building: { id: number }; location: { floor: { id: number } } }) =>
+        report.building.id === f.report.buildingId && report.location.floor.id === floor1.id)).toBe(true);
+      const mismatch = await request(app.getHttpServer()).get(`/api/v1${path}?buildingId=${other.report.buildingId}&floorId=${floor1.id}`)
+        .auth(tokens[3], { type: 'bearer' }).expect(200);
+      expect(mismatch.body.data.total).toBe(0);
+      await request(app.getHttpServer()).get(`/api/v1${path}?floorId=0`).auth(tokens[3], { type: 'bearer' }).expect(400);
+      await request(app.getHttpServer()).get(`/api/v1${path}?floorId=1abc`).auth(tokens[3], { type: 'bearer' }).expect(400);
+      const allFloors = await request(app.getHttpServer()).get(`/api/v1${path}?buildingId=${f.report.buildingId}`)
+        .auth(tokens[3], { type: 'bearer' }).expect(200);
+      expect(allFloors.body.data.total).toBe(2);
+    }
   });
 });

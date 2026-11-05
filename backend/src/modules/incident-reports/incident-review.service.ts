@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../core/database/prisma.service.js';
-import { ReportQueryDto } from './dto/report-query.dto.js';
+import { AdminReportQueryDto } from './dto/admin-report-query.dto.js';
 import { ReviewIncidentReportDto } from './dto/review-incident-report.dto.js';
 import { presentReport, reportInclude } from './report-response.js';
 
@@ -9,8 +9,9 @@ import { presentReport, reportInclude } from './report-response.js';
 export class IncidentReviewService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async pending(query: ReportQueryDto) {
-    const where: Prisma.IncidentReportWhereInput = { status: 'PENDING', ...(query.buildingId ? { buildingId: query.buildingId } : {}) };
+  async pending(query: AdminReportQueryDto) {
+    const where: Prisma.IncidentReportWhereInput = { status: 'PENDING', ...(query.buildingId ? { buildingId: query.buildingId } : {}),
+      ...(query.floorId ? { location: { floorId: query.floorId } } : {}) };
     const [items, total] = await this.prisma.$transaction([
       this.prisma.incidentReport.findMany({ where, include: reportInclude,
         // PostgreSQL enum declaration order is CRITICAL, HIGH, MEDIUM, LOW.
