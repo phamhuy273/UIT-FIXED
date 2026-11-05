@@ -33,6 +33,8 @@ export const router = createBrowserRouter([
       { path: '/admin/queue', element: <PendingQueueTable /> },
       { path: '/admin/categories', lazy: async () => ({ Component: (await import('@/features/admin/components/category-manager')).CategoryManager }) },
       { path: '/admin/departments', lazy: async () => ({ Component: (await import('@/features/admin/components/department-manager')).DepartmentManager }) },
+      { path: '/admin/students', lazy: async () => ({ Component: (await import('@/features/admin/components/student-manager')).StudentManager }) },
+      { path: '/admin/staff', lazy: async () => ({ Component: (await import('@/features/admin/components/staff-manager')).StaffManager }) },
       { path: '/admin/account', element: <AccountDesk scope="admin" /> },
     ] }],
   },
