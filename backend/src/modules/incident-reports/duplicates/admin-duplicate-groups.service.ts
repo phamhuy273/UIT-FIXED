@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../../core/database/prisma.service.js';
-import { ReportQueryDto } from '../dto/report-query.dto.js';
+import { AdminReportQueryDto } from '../dto/admin-report-query.dto.js';
 import { presentReport, reportInclude } from '../report-response.js';
 import { EmbeddingService, contentHash } from './embedding.service.js';
 import { groupReports } from './group-reports.js';
@@ -12,8 +12,9 @@ export class AdminDuplicateGroupsService {
   private running = false;
   constructor(private readonly db: PrismaService, private readonly embeddings: EmbeddingService) {}
 
-  async pending(query: ReportQueryDto) {
-    const where = { status: 'PENDING' as const, ...(query.buildingId ? { buildingId: query.buildingId } : {}) };
+  async pending(query: AdminReportQueryDto) {
+    const where = { status: 'PENDING' as const, ...(query.buildingId ? { buildingId: query.buildingId } : {}),
+      ...(query.floorId ? { location: { floorId: query.floorId } } : {}) };
     const [reports, totalReports] = await this.db.$transaction([
       this.db.incidentReport.findMany({ where, include: reportInclude, take: 200,
         orderBy: [{ urgency: { sort: 'asc', nulls: 'last' } }, { createdAt: 'asc' }, { id: 'asc' }] }),

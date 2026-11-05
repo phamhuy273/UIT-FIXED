@@ -11,13 +11,13 @@ import '../duplicate-groups.css';
 
 type OnReview = (report: IncidentReport, rejectReason?: string) => void;
 
-export function GroupedPendingReports({ buildingId, onReview, onShowAll }: {
-  buildingId?: number; onReview: OnReview; onShowAll: () => void;
+export function GroupedPendingReports({ buildingId, floorId, onReview, onShowAll }: {
+  buildingId?: number; floorId?: number; onReview: OnReview; onShowAll: () => void;
 }) {
   const [page, setPage] = useState(1);
   const userId = useAuthStore((state) => state.user?.id);
-  const query = useQuery({ queryKey: ['reports', 'pending-groups', userId, buildingId, page],
-    queryFn: ({ signal }) => getPendingGroups(page, buildingId, signal), refetchInterval: 30_000,
+  const query = useQuery({ queryKey: ['reports', 'pending-groups', userId, buildingId, floorId, page],
+    queryFn: ({ signal }) => getPendingGroups(page, buildingId, floorId, signal), refetchInterval: 30_000,
   });
   return <section className="admin-duplicate-groups" aria-label="Nhóm báo cáo có thể trùng lặp">
     <p>AI chỉ gợi ý nhóm tương tự. Bạn vẫn duyệt hoặc từ chối từng báo cáo.</p>
@@ -63,8 +63,9 @@ function SimilarGroup({ group, onReview }: { group: PendingGroup; onReview: OnRe
 }
 
 function ReportEntry({ report, reference, onReview }: { report: IncidentReport; reference?: IncidentReport; onReview: OnReview }) {
-  return <article className="admin-group-report" aria-label={`Báo cáo ${report.code}`}>
-    <header><strong>{report.code} · {report.title}</strong>{report.urgency && <Badge kind="urgency" value={report.urgency} />}</header>
+  return <article className={`admin-group-report${reference?.id === report.id ? ' is-reference' : ''}`} aria-label={`Báo cáo ${report.code}`}>
+    <header><div className="admin-report-heading"><span className="admin-report-code">{report.code}</span><h3>{report.title}</h3></div>
+      <div className="admin-report-markers">{reference?.id === report.id && <span className="admin-reference-label">Đang đối chiếu</span>}{report.urgency && <Badge kind="urgency" value={report.urgency} />}</div></header>
     <p>{report.building.name} · {report.location.name} · {report.category.name}</p>
     <p>{report.student.fullName ?? report.student.email} · Gửi {formatCampusPeriod(report.createdAt)}</p>
     <p>Phát hiện: {report.observedAt ? formatCampusPeriod(report.observedAt) : 'Không rõ ngày/buổi'}{report.recurrenceOfIncidentId ? ' · Báo cáo khả năng tái phát' : ''}</p>

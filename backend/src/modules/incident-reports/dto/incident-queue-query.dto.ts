@@ -1,8 +1,8 @@
 import { IncidentStatus } from '@prisma/client';
 import { IsEnum, IsOptional } from 'class-validator';
-import { ReportQueryDto } from './report-query.dto.js';
+import { AdminReportQueryDto } from './admin-report-query.dto.js';
 
-export class IncidentQueueQueryDto extends ReportQueryDto {
+export class IncidentQueueQueryDto extends AdminReportQueryDto {
   @IsOptional()
   @IsEnum(IncidentStatus)
   status?: IncidentStatus;

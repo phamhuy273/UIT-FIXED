@@ -9,8 +9,8 @@ export interface PendingGroupsPage {
   items: PendingGroup[]; total: number; totalReports: number; consideredReports: number;
   page: number; limit: number; totalPages: number; availability: 'ready' | 'partial' | 'unavailable';
 }
-export async function getPendingGroups(page: number, buildingId?: number, signal?: AbortSignal) {
+export async function getPendingGroups(page: number, buildingId?: number, floorId?: number, signal?: AbortSignal) {
   return (await apiClient.get<never, ApiResponse<PendingGroupsPage>>('/incident-reports/pending-groups', {
-    params: { page, limit: 10, buildingId }, signal,
+    params: { page, limit: 10, buildingId, floorId }, signal,
   })).data;
 }

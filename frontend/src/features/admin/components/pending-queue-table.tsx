@@ -35,6 +35,8 @@ export function PendingQueueTable() {
   const buildings = useLocations();
   const [activeQueue, setActiveQueue] = useState<'PENDING_REPORTS' | 'DISPATCH_INCIDENTS'>('PENDING_REPORTS');
   const [buildingId, setBuildingId] = useState('');
+  const [floorId, setFloorId] = useState('');
+  const floors = buildings.data?.find((building) => building.id === Number(buildingId))?.floors ?? [];
   const [page, setPage] = useState(1);
   const [incidentPage, setIncidentPage] = useState(1);
   const [selectedReport, setSelectedReport] = useState<IncidentReport | null>(null);
@@ -45,19 +47,20 @@ export function PendingQueueTable() {
 
   // 1. Pending Reports Query
   const pendingReportsQuery = useQuery({
-    queryKey: ['reports', 'pending', userId, page, buildingId],
+    queryKey: ['reports', 'pending', userId, page, buildingId, floorId],
     queryFn: ({ signal }) =>
-      getPendingReports(page, buildingId ? Number(buildingId) : undefined, signal),
+      getPendingReports(page, buildingId ? Number(buildingId) : undefined, floorId ? Number(floorId) : undefined, signal),
     refetchInterval: 30_000,
     enabled: activeQueue === 'PENDING_REPORTS',
   });
 
   // 2. Incidents Queue Query (Dispatch & Workload)
   const incidentsQuery = useQuery({
-    queryKey: ['incidents', 'queue', userId, incidentPage, buildingId],
+    queryKey: ['incidents', 'queue', userId, incidentPage, buildingId, floorId],
     queryFn: () =>
       getIncidentsQueue({
         buildingId: buildingId ? Number(buildingId) : undefined,
+        floorId: floorId ? Number(floorId) : undefined,
         page: incidentPage,
         limit: 10,
       }),
@@ -164,18 +167,19 @@ export function PendingQueueTable() {
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="queue-location-filters">
+            <div className="queue-location-filter">
             <label htmlFor="queue-building" className="text-small text-muted" style={{ whiteSpace: 'nowrap' }}>
               Tòa nhà:
             </label>
             <select
               id="queue-building"
               className="select"
-              style={{ width: 'auto', minWidth: 160, height: 36 }}
               value={buildingId}
               disabled={buildings.isPending || buildings.isError}
               onChange={(event) => {
                 setBuildingId(event.target.value);
+                setFloorId('');
                 setPage(1);
                 setIncidentPage(1);
               }}
@@ -187,6 +191,16 @@ export function PendingQueueTable() {
                 </option>
               ))}
             </select>
+            </div>
+            <div className="queue-location-filter">
+              <label htmlFor="queue-floor" className="text-small text-muted">Tầng:</label>
+              <select id="queue-floor" className="select" value={floorId}
+                disabled={!buildingId || buildings.isPending || buildings.isError || !floors.length}
+                onChange={(event) => { setFloorId(event.target.value); setPage(1); setIncidentPage(1); }}>
+                <option value="">{buildingId ? 'Tất cả tầng' : 'Chọn tòa nhà trước'}</option>
+                {floors.map((floor) => <option key={floor.id} value={floor.id}>{floor.name}</option>)}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -197,7 +211,8 @@ export function PendingQueueTable() {
               <button type="button" className="btn btn--secondary" aria-pressed={groupedView} onClick={() => setGroupedView(true)}>Gom báo cáo tương tự</button>
               <button type="button" className="btn btn--secondary" aria-pressed={!groupedView} onClick={() => setGroupedView(false)}>Danh sách thường</button>
             </div>
-            {groupedView ? <GroupedPendingReports key={buildingId || 'all'} buildingId={buildingId ? Number(buildingId) : undefined}
+            {groupedView ? <GroupedPendingReports key={`${buildingId || 'all'}:${floorId || 'all'}`} buildingId={buildingId ? Number(buildingId) : undefined}
+              floorId={floorId ? Number(floorId) : undefined}
               onShowAll={() => setGroupedView(false)} onReview={(report, rejectReason) => { setInitialRejectReason(rejectReason); setSelectedReport(report); }} /> : <>
             {pendingReportsQuery.isPending && (
               <div className="skeleton" style={{ height: 240, margin: '20px 0', borderRadius: 'var(--radius-md)' }} />
