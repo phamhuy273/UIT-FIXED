@@ -71,6 +71,7 @@ model User {
   uploadedMedia    Media[]
 
   submittedReports IncidentReport[]
+  reportConfirmations ReportConfirmation[]
   reportHistories  IncidentReportHistory[]
 
   assignmentsMade     IncidentAssignment[] @relation("AssignmentAssignedBy")
@@ -214,6 +215,8 @@ model IncidentReport {
   locationId  Int              @map("location_id")
   title       String
   description String
+  observedAt DateTime? @map("observed_at") @db.Timestamptz(3)
+  recurrenceOfIncidentId Int? @map("recurrence_of_incident_id")
   urgency     IncidentUrgency?
   status      ReportStatus     @default(PENDING)
   createdAt   DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
@@ -227,14 +230,43 @@ model IncidentReport {
   media     Media[]
   histories IncidentReportHistory[]
   incident  Incident?
+  recurrenceOfIncident Incident? @relation("ReportRecurrence", fields: [recurrenceOfIncidentId], references: [id], onDelete: Restrict)
+  confirmations ReportConfirmation[]
+  embedding ReportEmbedding?
 
   @@index([studentId])
   @@index([categoryId])
   @@index([buildingId])
   @@index([locationId])
+  @@index([recurrenceOfIncidentId])
   @@index([status])
   @@index([createdAt])
   @@map("incident_reports")
+}
+
+model ReportConfirmation {
+  id Int @id @default(autoincrement())
+  reportId Int @map("report_id")
+  studentId Int @map("student_id")
+  observedAt DateTime? @map("observed_at") @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  report IncidentReport @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  student User @relation(fields: [studentId], references: [id], onDelete: Restrict)
+
+  @@unique([reportId, studentId])
+  @@index([studentId, createdAt])
+  @@map("report_confirmations")
+}
+
+model ReportEmbedding {
+  reportId Int @id @map("report_id")
+  modelVersion String @map("model_version")
+  contentHash String @map("content_hash")
+  vector Float[]
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  report IncidentReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@map("report_embeddings")
 }
 
 model IncidentReportHistory {
@@ -266,6 +298,7 @@ model Incident {
   updatedAt DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   report        IncidentReport         @relation(fields: [reportId], references: [id], onDelete: Restrict)
+  recurrenceReports IncidentReport[] @relation("ReportRecurrence")
   assignments   IncidentAssignment[]
   progressNotes IncidentProgressNote[]
   resolutions   IncidentResolution[]

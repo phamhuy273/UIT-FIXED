@@ -12,6 +12,7 @@ import { cancelReport, getMyReports } from '../api/incident-reports.api';
 import type { IncidentReport } from '../types/incident-report.types';
 import { ReportPagination } from './report-pagination';
 import { Inbox } from 'lucide-react';
+import { ConfirmedReports } from './confirmed-reports';
 
 export function ReportList() {
   const userId = useAuthStore((state) => state.user?.id);
@@ -58,6 +59,8 @@ export function ReportList() {
           {message}
         </div>
       )}
+
+      <ConfirmedReports />
 
       {query.data && query.data.items.length > 0 && (
         <div className="report-stats">

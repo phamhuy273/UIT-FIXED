@@ -99,7 +99,7 @@ UIT-FIXED (Monorepo)
 
 | Hạng mục | Công nghệ / Công cụ | Phiên bản | Ghi chú |
 | :--- | :--- | :--- | :--- |
-| **Runtime Môi trường** | **Node.js** | `>= 20.x` (LTS) / `v24.x` | Khuyến nghị Node.js 20 LTS trở lên (Container dùng node:20-alpine) |
+| **Runtime Môi trường** | **Node.js** | `24.x` cho hướng dẫn local bên dưới | Bản local + AI được kiểm tra trên Node.js 24; Dockerfile hiện dùng node:20-alpine, chưa xác minh full-stack AI |
 | **Trình quản lý gói** | **npm** | `>= 10.x` / `11.x` | Sử dụng `npm.cmd` trên Windows PowerShell |
 | **Hạ tầng Container** | **Docker & Docker Compose** | `Docker 28.x`, `Compose v2.x` | Đóng gói toàn bộ PostgreSQL, Backend, Frontend |
 | **Cơ sở dữ liệu** | **PostgreSQL** | `16-alpine` | Chạy container hóa với volume lưu trữ độc lập |
@@ -116,73 +116,179 @@ UIT-FIXED (Monorepo)
 
 ---
 
-## 6. Hướng dẫn Cài đặt & Khởi chạy (Quick Start)
+## 6. Hướng dẫn Cài đặt & Khởi chạy, bao gồm AI Duplicate
 
-### 1. Yêu cầu Tiên quyết (Prerequisites)
-- Đã cài đặt **Git**
-- Đã cài đặt **Node.js >= 20.x LTS**
-- Đã cài đặt **Docker & Docker Desktop** (khuyên dùng)
+Hướng dẫn đã kiểm tra: **PostgreSQL chạy Docker; backend, frontend và AI chạy local**.
+Các lệnh dưới đây dùng Windows PowerShell. Trên Linux/macOS, dùng `npm` thay `npm.cmd`.
 
-### 2. Tải mã nguồn & Cấu hình môi trường
-```bash
-# 1. Clone repository về máy
+### 6.1. Chuẩn bị và lấy đúng source
+
+- Git, Node.js **24.x**, npm và Docker Desktop đang hoạt động.
+- Có Internet để cài thư viện và tải model lần đầu; không bắt buộc GPU.
+- Không cần cài Ollama, LM Studio hoặc một ứng dụng AI riêng.
+
+```powershell
 git clone https://github.com/phamhuy273/UIT-FIXED.git
 cd UIT-FIXED
+git fetch origin
 
-# 2. Tạo file cấu hình môi trường từ mẫu
-cp .env.example .env
-```
-Mở file `.env` và điền thông tin tài khoản Cloudinary của bạn:
-```env
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+# Khi tính năng AI chưa được merge vào main, dùng branch có đủ code AI:
+git switch --track origin/feat/US-00-admin-duplicate-triage
 ```
 
-### 3. Cách 1: Khởi chạy nhanh bằng Docker (Khuyên dùng)
-Chỉ với 1 câu lệnh để chạy toàn bộ PostgreSQL, Backend và Frontend trong môi trường cách ly:
-```bash
-docker compose up --build
-```
-Sau khi các container khởi động, đồng bộ schema vào PostgreSQL:
-```bash
-docker compose exec backend npx prisma db push
-```
-- **Giao diện Web (Frontend):** http://localhost:3000
-- **Giao diện API Docs / Endpoint:** http://localhost:5000/api/v1
-- **Cơ sở dữ liệu PostgreSQL:** localhost:5432
+Nếu đã có branch local, dùng `git switch feat/US-00-admin-duplicate-triage` rồi
+`git pull --ff-only`. Khi AI đã được merge, có thể dùng branch tích hợp của nhóm.
+GitHub chỉ cung cấp source; không tự cài thư viện, chạy migration hay tải model trên máy khác.
 
-### 4. Cách 2: Chạy trên máy cục bộ (Local Development)
+### 6.2. Cấu hình môi trường và PostgreSQL
 
-#### Bước 4.1: Khởi động cơ sở dữ liệu PostgreSQL (qua Docker)
-```bash
+Tại thư mục gốc repository:
+
+```powershell
+# Chỉ tạo file nếu chưa có, không ghi đè cấu hình đang dùng
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+Điền cấu hình PostgreSQL trong `.env` gốc, sau đó chạy:
+
+```powershell
 docker compose up -d postgres
+docker compose ps postgres
+if (!(Test-Path backend/.env)) { Copy-Item .env.example backend/.env }
 ```
 
-#### Bước 4.2: Cài đặt và khởi chạy Backend (NestJS)
-```bash
+Chỉnh **`backend/.env`** cho môi trường local:
+
+- `DATABASE_URL`: dùng host **`127.0.0.1`**, port PostgreSQL đã cấu hình; user,
+  password và tên DB phải khớp container. Host `postgres` chỉ dùng giữa các container.
+- Cấu hình `JWT_SECRET`, `JWT_EXPIRES_IN` và thông tin Cloudinary của môi trường bạn dùng.
+- Backend mặc định chạy port `5000`; nếu đổi thì dùng biến `PORT` và đồng bộ cấu hình frontend/CORS.
+
+Không commit `.env`, không dùng chung thông tin xác thực cục bộ qua Git.
+Nếu DB đã có dữ liệu, giữ nguyên volume và cấu hình kết nối; không reset DB hoặc xóa volume để cập nhật source.
+
+### 6.3. Cài backend, áp dụng migration và chuẩn bị dữ liệu
+
+```powershell
 cd backend
-npm.cmd install
+npm.cmd ci
+npm.cmd run db:generate
+npm.cmd run db:validate
+npm.cmd run db:migrate
+npm.cmd run db:status
 
-# Tạo Prisma Client và đồng bộ bảng vào PostgreSQL
-npx.cmd prisma generate
-npx.cmd prisma db push
+# Chạy khi cần nạp danh mục phòng học/danh mục sự cố vào DB phát triển
+npm.cmd run db:seed
+```
 
-# Chạy server ở chế độ Development (Watch mode)
+`db:migrate` dùng `prisma migrate deploy`, áp dụng cả migration AI đã có trong source.
+Không dùng `prisma db push` để thay thế migration: các ràng buộc SQL và lịch sử migration
+cũng là một phần của hệ thống. Seed danh mục không tạo tài khoản Admin hoặc tự sinh báo cáo mẫu.
+
+### 6.4. Tải và khởi tạo model AI cục bộ
+
+Vẫn ở thư mục `backend`, thực hiện trước khi chạy server:
+
+```powershell
+# Build, tải model vào cache nếu chưa có và kiểm tra vài câu tiếng Việt
+npm.cmd run ai:warmup
+
+# Build, tạo/cập nhật embedding cho report đang chờ duyệt hoặc đã duyệt trong DB hiện tại
+npm.cmd run ai:index
+
+# Chạy backend với chế độ theo dõi thay đổi
 npm.cmd run start:dev
 ```
 
-#### Bước 4.3: Cài đặt và khởi chạy Frontend (ReactJS)
-Mở một cửa sổ Terminal mới:
-```bash
-cd frontend
-npm.cmd install
+AI dùng **`Xenova/paraphrase-multilingual-MiniLM-L12-v2`**, ONNX q8, vector 384 chiều,
+chạy trên **CPU của máy chạy backend** qua `@huggingface/transformers`.
+Model được cố định phiên bản trong code và tải vào `backend/.cache/models`.
+Vector report nằm trong bảng `report_embeddings` của DB đang kết nối.
 
-# Chạy server giao diện
-npm.cmd run dev
+Nội dung report được xử lý cục bộ, không gửi tới API suy luận AI bên ngoài.
+Máy mới phải tự tải model và tạo embedding từ DB của máy đó; cache model/DB không đi cùng Git.
+Chạy lại `ai:index` an toàn để bổ sung/refresh dữ liệu dẫn xuất; report thiếu embedding
+cũng được xử lý khi có lượt kiểm tra phù hợp.
+
+Các biến tùy chọn cho backend trong `backend/.env`:
+
+```env
+AI_DUPLICATES_ENABLED=true
+AI_DUPLICATE_THRESHOLD=0.80
+# Chỉ bật true sau khi đã tải đủ model vào cache
+AI_MODEL_OFFLINE=false
 ```
 
-*Lưu ý trên Windows PowerShell: Nếu gặp lỗi chặn chạy script (`ExecutionPolicy`), hãy sử dụng lệnh có đuôi `.cmd` (ví dụ `npm.cmd`, `npx.cmd`).*
+Ngưỡng `0.80` là cosine similarity thử nghiệm, **không phải xác suất trùng 80%**.
+Độ chính xác cần được đánh giá bằng dữ liệu tiếng Việt thực tế.
+AI lỗi hoặc phản hồi chậm thì sinh viên vẫn gửi được, Admin vẫn xem danh sách thường.
+
+### 6.5. Cài và chạy frontend
+
+Mở terminal mới tại thư mục gốc repository:
+
+```powershell
+cd frontend
+npm.cmd ci
+npm.cmd run dev -- --host 127.0.0.1 --port 3000 --strictPort
+```
+
+Frontend mặc định gọi `http://localhost:5000/api/v1`. Nếu cần cấu hình khác,
+tạo `frontend/.env.local` với `VITE_API_BASE_URL` phù hợp rồi chạy lại Vite.
+
+- **Web:** [http://localhost:3000](http://localhost:3000)
+- **API base:** [http://localhost:5000/api/v1](http://localhost:5000/api/v1)
+- **Tạo report:** `/reports/new`, dùng tài khoản STUDENT.
+- **Nhóm report Admin:** `/admin/queue`, dùng tài khoản ADMIN đã được cấp.
+
+Hướng dẫn này không xác nhận AI chạy trong full-stack Dockerfile Alpine hiện có.
+Nếu triển khai AI bằng container, cần kiểm tra ONNX Runtime trên image đích và giữ
+cache model bằng volume; không mặc định `docker compose up --build` đã chuẩn bị đủ AI.
+
+### 6.6. Test nhanh AI Duplicate
+
+1. Sinh viên A gửi report, ví dụ “Máy chiếu không lên nguồn” ở một phòng học.
+2. Sinh viên B chọn **cùng phòng và cùng danh mục**, nhập một cách diễn đạt tương tự;
+   ngừng nhập khoảng một giây để kiểm tra. Khác danh mục bị loại trước khi gọi AI.
+3. Chọn **“Tôi cũng gặp sự cố này”**: theo dõi sự cố chung, không tạo thêm report chờ duyệt.
+4. Muốn thử nhóm Admin: chọn tiếp tục gửi report mới thay vì cùng gặp lỗi, rồi đăng nhập
+   Admin vào `/admin/queue` → **“Gom báo cáo tương tự”** → mở nhóm để đối chiếu từng report.
+   **“Từ chối do trùng”** chỉ điền sẵn lý do; Admin vẫn cần xác nhận từng report.
+5. Chỉ nhập **ngày + Sáng/Chiều/Không rõ**, không cần giờ phút. Nếu buổi phát hiện
+   trùng buổi sửa, hệ thống hỏi lỗi xảy ra trước hay sau khi sửa; không tự đoán thứ tự.
+6. Đổi phòng hoặc danh mục và thử một triệu chứng khác để kiểm tra kết quả không liên quan.
+
+AI chỉ đề xuất, không tự gộp/xóa report. Admin grouping chỉ gom để xem và duyệt/từ chối
+từng report riêng. Khi có quá nhiều report, nhóm AI hiển thị phạm vi đã xét và vẫn có
+**“Danh sách thường”** để xem toàn bộ.
+
+Chi tiết thuật toán, API, giới hạn và quyền riêng tư:
+[AI_DUPLICATE_DETECTION.md](doc/AI_DUPLICATE_DETECTION.md).
+
+### 6.7. Kiểm tra và xử lý lỗi khởi chạy
+
+```powershell
+# Trong backend — test tuần tự để ổn định trên Windows
+npm.cmd run build
+npm.cmd test -- --maxWorkers=1 --no-file-parallelism
+npm.cmd run test:e2e -- --maxWorkers=1 --no-file-parallelism
+
+# Trong frontend
+npm.cmd run build
+npm.cmd run lint
+npm.cmd run test:master-data
+npm.cmd run test:duplicates
+```
+
+| Triệu chứng | Cách xử lý |
+| --- | --- |
+| `npm ci` báo `EPERM` ở Prisma/ONNX/Vite DLL | Dừng đúng tiến trình backend/frontend của dự án đang giữ file, rồi cài lại. |
+| Không kết nối được DB | Kiểm tra container healthy, port và `backend/.env`; backend local dùng host `127.0.0.1`. |
+| Thiếu bảng `report_embeddings`/`report_confirmations` | Chạy `npm.cmd run db:migrate` và `db:generate` trong backend. |
+| Model tải lỗi hoặc cache chưa đủ | Kiểm tra mạng, dung lượng và quyền ghi cache; chạy lại `ai:warmup`. Không bật offline trước lần tải thành công. |
+| Chưa thấy gợi ý trùng | Kiểm tra đúng phòng/danh mục, mô tả đủ nội dung, AI đang bật và đã warmup/index. Gợi ý không bảo đảm phát hiện mọi cặp trùng. |
+| Lỗi 401/403 | Đăng nhập lại và dùng đúng vai trò; trang nhóm report chỉ dành cho Admin. |
+| Port 3000/5000 đã được sử dụng | Dừng đúng server cũ trước khi chạy server mới; không để frontend tự đổi port rồi gặp lỗi CORS. |
 
 ---
 

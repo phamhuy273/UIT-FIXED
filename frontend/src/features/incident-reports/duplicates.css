@@ -1,0 +1,11 @@
+.duplicate-notice, .confirmed-reports { margin-block: 20px; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface, #fff); }
+.duplicate-notice h3, .confirmed-reports h2 { margin: 0 0 10px; }
+.duplicate-notice p, .confirmed-reports p { margin: 8px 0; font-size: 14px; overflow-wrap: anywhere; }
+.duplicate-match { border-top: 1px solid var(--border); padding-block: 16px; }
+.duplicate-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.duplicate-notice button { white-space: normal; height: auto; min-height: 44px; }
+.observation-period { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.observation-period > div { min-width: 0; }
+.observation-period label { display: block; margin-bottom: 6px; font-size: 14px; }
+@media (max-width: 600px) { .duplicate-notice, .confirmed-reports { padding: 16px; } .duplicate-actions button { width: 100%; } }
+@media (max-width: 600px) { .observation-period { grid-template-columns: 1fr; } }

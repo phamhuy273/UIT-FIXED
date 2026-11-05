@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test:duplicates": "node --experimental-strip-types --test test/observation-period.test.ts",
     "test:master-data": "node --experimental-strip-types --test test/location-selection.test.ts",
     "dev": "vite",
     "build": "tsc -b && vite build",

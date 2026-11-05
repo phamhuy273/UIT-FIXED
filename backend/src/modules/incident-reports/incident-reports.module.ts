@@ -10,10 +10,17 @@ import { IncidentStatsController } from './incident-stats.controller.js';
 import { IncidentStatsService } from './incident-stats.service.js';
 import { StaffIncidentsController } from './staff-incidents.controller.js';
 import { StaffIncidentsService } from './staff-incidents.service.js';
+import { DuplicateController } from './duplicates/duplicate.controller.js';
+import { DuplicateService } from './duplicates/duplicate.service.js';
+import { EmbeddingService } from './duplicates/embedding.service.js';
+import { AdminDuplicateGroupsController } from './duplicates/admin-duplicate-groups.controller.js';
+import { AdminDuplicateGroupsService } from './duplicates/admin-duplicate-groups.service.js';
 
 @Module({
   imports: [AuthModule],
   controllers: [
+    DuplicateController,
+    AdminDuplicateGroupsController,
     IncidentReportsController,
     IncidentReviewController,
     IncidentStatsController,
@@ -21,6 +28,8 @@ import { StaffIncidentsService } from './staff-incidents.service.js';
     StaffIncidentsController,
   ],
   providers: [
+    DuplicateService, EmbeddingService,
+    AdminDuplicateGroupsService,
     IncidentReportsService,
     IncidentReviewService,
     IncidentStatsService,

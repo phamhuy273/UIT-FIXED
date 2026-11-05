@@ -18,6 +18,10 @@ import {
   type Urgency,
 } from '../types/incident-report.types';
 import { readErrorMessage } from '@/features/auth/lib/api-error';
+import { DuplicateNotice } from './duplicate-notice';
+import { useDuplicateCheck } from '../hooks/use-duplicate-check';
+import { confirmDuplicate, type DuplicateCandidate } from '../api/duplicates.api';
+import { campusPeriod, campusToday, observationTimestamp, type ObservationPeriod } from '../utils/observation-period';
 import '../incidents.css';
 
 export function ReportForm() {
@@ -37,6 +41,21 @@ export function ReportForm() {
   const [images, setImages] = useState<UploadMediaResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [observedDay, setObservedDay] = useState(() => campusToday());
+  const [observedPeriod, setObservedPeriod] = useState<ObservationPeriod>('');
+  const observedAt = observationTimestamp(observedDay, observedPeriod);
+  const duplicate = useDuplicateCheck({ locationId: location.locationId ?? 0, categoryId: Number(categoryId),
+    title: title.trim(), description: description.trim(), ...(observedAt ? { observedAt } : {}) });
+  const [decision, setDecision] = useState<{ key: string; recurrenceOfIncidentId?: number; relativeToRepair?: 'BEFORE' | 'AFTER' } | null>(null);
+  const reviewed = decision?.key === duplicate.key;
+  const confirmation = useMutation({
+    mutationFn: ({ candidate, relativeToRepair }: { candidate: DuplicateCandidate; relativeToRepair?: 'BEFORE' | 'AFTER' }) => confirmDuplicate(candidate, observedAt, relativeToRepair),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['reports'] });
+      navigate('/', { replace: true, state: { message: 'Đã ghi nhận bạn cùng gặp sự cố. Bạn có thể theo dõi tiến độ trong “Sự cố tôi cùng gặp”.' } });
+    },
+    onError: () => { void duplicate.query.refetch(); },
+  });
 
   const mutation = useMutation({
     mutationFn: (payload: CreateReportInput) => createReport(payload),
@@ -75,6 +94,15 @@ export function ReportForm() {
               setError('Tiêu đề cần ít nhất 5 ký tự và mô tả ít nhất 10 ký tự.');
               return;
             }
+            if (confirmation.isPending) return;
+            if (observedPeriod && (!observedAt || new Date(observedAt).getTime() > Date.now())) {
+              setError('Vui lòng chọn ngày và buổi phát hiện hợp lệ, không nằm trong tương lai.');
+              return;
+            }
+            if (duplicate.query.data?.candidates.length && !reviewed) {
+              setError('Có sự cố tương tự. Hãy chọn cùng gặp sự cố, báo tái phát hoặc tiếp tục gửi lỗi khác trong mục “Kiểm tra sự cố tương tự”.');
+              return;
+            }
             mutation.mutate({
               buildingId: location.buildingId!,
               locationId: location.locationId!,
@@ -83,6 +111,9 @@ export function ReportForm() {
               description: description.trim(),
               ...(urgency ? { urgency } : {}),
               mediaIds: images.map((image) => image.id),
+              ...(observedAt ? { observedAt } : {}),
+              ...(reviewed && decision.recurrenceOfIncidentId ? { recurrenceOfIncidentId: decision.recurrenceOfIncidentId } : {}),
+              ...(reviewed && decision.relativeToRepair ? { relativeToRepair: decision.relativeToRepair } : {}),
             });
           }}
         >
@@ -254,6 +285,35 @@ export function ReportForm() {
             </div>
           </section>
 
+          <div className="field" style={{ marginTop: 20 }}>
+            <span className="field__label">Bạn phát hiện sự cố khi nào?</span>
+            <div className="observation-period">
+              <div><label htmlFor="report-observed-day">Ngày phát hiện</label>
+                <input id="report-observed-day" className="input" type="date" value={observedDay} max={campusToday()}
+                  disabled={mutation.isPending || confirmation.isPending} onChange={(event) => {
+                    const day = event.target.value;
+                    setObservedDay(day);
+                    if (day === campusToday() && campusPeriod() === 'AM' && observedPeriod === 'PM') setObservedPeriod('');
+                  }} aria-describedby="observed-help" /></div>
+              <div><label htmlFor="report-observed-period">Buổi phát hiện</label>
+                <select id="report-observed-period" className="select" value={observedPeriod}
+                  disabled={mutation.isPending || confirmation.isPending} onChange={(event) => setObservedPeriod(event.target.value as ObservationPeriod)} aria-describedby="observed-help">
+                  <option value="">Không rõ</option><option value="AM">Sáng</option>
+                  <option value="PM" disabled={observedDay === campusToday() && campusPeriod() === 'AM'}>Chiều</option>
+                </select></div>
+            </div>
+            <p id="observed-help" className="text-muted">Chỉ chọn ngày và buổi, không cần giờ phút. Chọn “Không rõ” nếu bạn không nhớ.</p>
+          </div>
+          {duplicate.eligible && <DuplicateNotice result={duplicate.query.data}
+            loading={duplicate.waiting || duplicate.query.isFetching} failed={duplicate.query.isError} reviewed={reviewed}
+            disabled={mutation.isPending || confirmation.isPending || uploading}
+            onConfirm={(candidate, relativeToRepair) => { setError(null); confirmation.mutate({ candidate, relativeToRepair }); }}
+            onContinue={(candidate, relativeToRepair) => {
+              setError(null);
+              setDecision({ key: duplicate.key, relativeToRepair, ...(candidate?.incidentId ? { recurrenceOfIncidentId: candidate.incidentId } : {}) });
+            }} onRetry={() => { void duplicate.query.refetch(); }} />}
+          {confirmation.isError && <p className="field__error" role="alert">{readErrorMessage(confirmation.error, 'Không xác nhận được. Hãy kiểm tra lại hoặc gửi báo cáo mới.')}</p>}
+
           {error || mutation.isError ? (
             <p className="field__error" role="alert" style={{ marginTop: '16px', fontSize: '13px' }}>
               {error || readErrorMessage(mutation.error, 'Không gửi được báo cáo. Vui lòng thử lại.')}
@@ -285,6 +345,7 @@ export function ReportForm() {
               className="btn btn--primary btn--lg"
               disabled={
                 mutation.isPending ||
+                confirmation.isPending ||
                 uploading ||
                 buildings.isPending ||
                 buildings.isError ||

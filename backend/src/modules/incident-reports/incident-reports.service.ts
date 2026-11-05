@@ -4,12 +4,14 @@ import { PrismaService } from '../../core/database/prisma.service.js';
 import { CreateIncidentReportDto } from './dto/create-incident-report.dto.js';
 import { ReportQueryDto } from './dto/report-query.dto.js';
 import { presentReport, reportInclude } from './report-response.js';
+import { classifyTime, observationDate } from './duplicates/duplicate-rules.js';
 
 @Injectable()
 export class IncidentReportsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(studentId: number, dto: CreateIncidentReportDto) {
+    const observedAt = observationDate(dto.observedAt);
     return this.prisma.$transaction(async (tx) => {
       const location = await tx.location.findFirst({
         where: { id: dto.locationId, buildingId: dto.buildingId, isActive: true, building: { isActive: true } },
@@ -21,10 +23,20 @@ export class IncidentReportsService {
       if (!await tx.category.findFirst({ where: { id: dto.categoryId, isActive: true } })) {
         throw new BadRequestException('Danh mục không tồn tại hoặc đã ngừng sử dụng.');
       }
+      if (dto.recurrenceOfIncidentId) {
+        const previous = await tx.incident.findFirst({ where: {
+          id: dto.recurrenceOfIncidentId, status: 'RESOLVED', report: { locationId: dto.locationId, categoryId: dto.categoryId },
+        }, include: { resolutions: { orderBy: { resolvedAt: 'desc' }, take: 1 } } });
+        if (!previous?.resolutions[0] || classifyTime(previous.resolutions[0].resolvedAt, observedAt, dto.relativeToRepair) !== 'POSSIBLE_RECURRENCE') {
+          throw new BadRequestException('Sự cố tái phát phải cùng phòng, cùng danh mục và được xác nhận xảy ra sau khi khắc phục.');
+        }
+      }
       const report = await tx.incidentReport.create({
         data: { studentId, buildingId: dto.buildingId, locationId: dto.locationId, categoryId: dto.categoryId,
           title: dto.title, description: dto.description, urgency: dto.urgency,
-          histories: { create: { actorId: studentId, action: 'CREATED', toStatus: 'PENDING' } },
+          observedAt, recurrenceOfIncidentId: dto.recurrenceOfIncidentId,
+          histories: { create: { actorId: studentId, action: 'CREATED', toStatus: 'PENDING',
+            reason: dto.recurrenceOfIncidentId && dto.relativeToRepair === 'AFTER' ? 'Sinh viên xác nhận lỗi xuất hiện lại sau khi khắc phục.' : null } },
         },
       });
       const mediaIds = dto.mediaIds ?? [];
