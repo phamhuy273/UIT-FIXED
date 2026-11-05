@@ -197,11 +197,19 @@ export class StaffIncidentsService {
         throw new ConflictException('Sự cố phải đang ở trạng thái xử lý (IN_PROGRESS) trước khi hoàn tất.');
       }
 
-      // Update incident status to RESOLVED
-      await tx.incident.update({
-        where: { id: incident.id },
+      // Recheck state and assignment when acquiring the write lock: only one
+      // concurrent completion may create a resolution/history for this incident.
+      const changed = await tx.incident.updateMany({
+        where: {
+          id: incident.id,
+          status: IncidentStatus.IN_PROGRESS,
+          assignments: { some: { id: currentAssignment.id, assigneeId: staffId, isCurrent: true } },
+        },
         data: { status: IncidentStatus.RESOLVED },
       });
+      if (changed.count !== 1) {
+        throw new ConflictException('Sự cố vừa được xử lý hoặc thay đổi phân công. Vui lòng tải lại.');
+      }
 
       // Create resolution
       const resolution = await tx.incidentResolution.create({
@@ -213,12 +221,16 @@ export class StaffIncidentsService {
         },
       });
 
-      // Connect media if provided
+      // Atomically claim only this staff member's unused uploads. Clearing the
+      // temporary owner preserves the single-parent media constraint.
       if (dto.mediaIds && dto.mediaIds.length > 0) {
-        await tx.media.updateMany({
-          where: { id: { in: dto.mediaIds } },
-          data: { resolutionId: resolution.id },
+        const attached = await tx.media.updateMany({
+          where: { id: { in: dto.mediaIds }, userId: staffId, reportId: null, resolutionId: null },
+          data: { userId: null, resolutionId: resolution.id },
         });
+        if (attached.count !== dto.mediaIds.length) {
+          throw new BadRequestException('Ảnh không thuộc tài khoản hoặc đã được sử dụng.');
+        }
       }
 
       // Log history

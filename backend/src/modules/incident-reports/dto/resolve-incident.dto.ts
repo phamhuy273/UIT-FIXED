@@ -1,4 +1,4 @@
-import { ArrayMaxSize, IsArray, IsInt, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { ArrayMaxSize, ArrayUnique, IsArray, IsInt, IsOptional, IsString, MaxLength, Min, MinLength } from 'class-validator';
 
 export class ResolveIncidentDto {
   @IsString()
@@ -9,6 +9,8 @@ export class ResolveIncidentDto {
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(5)
+  @ArrayUnique()
   @IsInt({ each: true })
+  @Min(1, { each: true })
   mediaIds?: number[];
 }
