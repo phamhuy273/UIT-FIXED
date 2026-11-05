@@ -1,3 +1,4 @@
+import type { Role } from '@/features/auth/types/auth.types';
 import type { IncidentReport, ReportStatus, Urgency } from '@/features/incident-reports/types/incident-report.types';
 export type ReviewInput = { action: 'APPROVE'; categoryId: number; urgency: Urgency } | { action: 'REJECT'; reason: string };
 
@@ -12,6 +13,30 @@ export interface AdminCategory {
 }
 export interface CategoryInput { name: string; description: string | null; }
 export type CategoryUpdate = Partial<CategoryInput> & { isActive?: boolean };
+
+export interface AdminDepartment {
+  id: number;
+  name: string;
+  description: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  staffCount: number;
+  memberCount: number;
+  assignmentCount: number;
+  activeAssignmentCount: number;
+  buildingCount: number;
+}
+export interface DepartmentMember {
+  id: number;
+  fullName: string | null;
+  email: string;
+  role: Role;
+  isActive: boolean;
+}
+export interface AdminDepartmentDetail extends AdminDepartment { staff: DepartmentMember[]; }
+export interface DepartmentInput { name: string; description: string | null; }
+export type DepartmentUpdate = Partial<DepartmentInput> & { isActive?: boolean };
 
 export type StatsRange = 7 | 30 | 90;
 export type StatsScope = 'active' | 'approved';

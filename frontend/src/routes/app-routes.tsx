@@ -32,6 +32,7 @@ export const router = createBrowserRouter([
       { path: '/admin', lazy: async () => ({ Component: (await import('@/features/admin/components/admin-dashboard')).AdminDashboard }) },
       { path: '/admin/queue', element: <PendingQueueTable /> },
       { path: '/admin/categories', lazy: async () => ({ Component: (await import('@/features/admin/components/category-manager')).CategoryManager }) },
+      { path: '/admin/departments', lazy: async () => ({ Component: (await import('@/features/admin/components/department-manager')).DepartmentManager }) },
       { path: '/admin/account', element: <AccountDesk scope="admin" /> },
     ] }],
   },

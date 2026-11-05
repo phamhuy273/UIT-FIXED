@@ -37,7 +37,7 @@ function useCategoryMutation<TInput>(mutationFn: (input: TInput) => Promise<Admi
   });
 }
 
-function MutationError({ error, fallback }: { error: unknown; fallback: string }) {
+export function MutationError({ error, fallback }: { error: unknown; fallback: string }) {
   // Axios network failures carry an English message and no statusCode; only API errors are shown verbatim.
   const fromApi = typeof error === 'object' && error !== null && 'statusCode' in error;
   return <p className="category-alert" role="alert">{fromApi ? readErrorMessage(error, fallback) : fallback}</p>;

@@ -2,7 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/auth.store';
 import { MainLayout } from './main-layout';
-import { LayoutDashboard, Inbox, FilePlus2, FileText, User, LogOut, Wrench, Tags } from 'lucide-react';
+import { LayoutDashboard, Inbox, FilePlus2, FileText, User, LogOut, Wrench, Tags, Network } from 'lucide-react';
 import { roleLabel } from '@/features/auth/lib/auth-rules';
 
 export function WorkspaceLayout({ scope }: { scope: 'student' | 'admin' | 'staff' }) {
@@ -23,6 +23,7 @@ export function WorkspaceLayout({ scope }: { scope: 'student' | 'admin' | 'staff
       { id: '/admin', label: 'Tổng quan', icon: <LayoutDashboard size={18} strokeWidth={1.75} /> },
       { id: '/admin/queue', label: 'Hàng đợi chờ duyệt', icon: <Inbox size={18} strokeWidth={1.75} /> },
       { id: '/admin/categories', label: 'Danh mục sự cố', icon: <Tags size={18} strokeWidth={1.75} /> },
+      { id: '/admin/departments', label: 'Phòng ban', icon: <Network size={18} strokeWidth={1.75} /> },
       { id: '/admin/account', label: 'Tài khoản', icon: <User size={18} strokeWidth={1.75} /> },
     ];
   } else if (scope === 'staff') {
