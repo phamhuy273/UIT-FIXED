@@ -1,0 +1,55 @@
+.department-table th {
+  white-space: nowrap;
+}
+
+.department-table th.num,
+.department-table td.num {
+  width: 110px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.department-table__status { width: 160px; }
+.department-table__date { width: 150px; }
+
+.department-table tr.is-inactive .cell-title {
+  color: var(--text-muted);
+}
+
+.department-table .category-actions .btn {
+  min-width: 0;
+}
+
+.department-members {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.department-members li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.department-members li:last-child {
+  border-bottom: 0;
+}
+
+.department-members li.is-inactive .cell-title {
+  color: var(--text-muted);
+}
+
+.department-members__role {
+  flex: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .department-table__date { display: none; }
+}
