@@ -335,3 +335,10 @@ Cấu trúc chuẩn: `<type>(<scope>): <mo ta ngan gon>`
    - Chọn Base branch: `develop` <- Compare branch: `feature/ten-tinh-nang`.
    - Điền mô tả chi tiết nội dung thay đổi, gắn nhãn (Label) tương ứng với Sprint Backlog Item.
    - Yêu cầu ít nhất 1 thành viên trong nhóm (Peer Review) duyệt và approve trước khi tiến hành merge vào `develop`.
+
+## 8. Quy trình Phát triển có AI Hỗ trợ
+
+Nhóm sử dụng AI như trợ lý để làm rõ task, khảo sát code, triển khai, kiểm thử
+và chuẩn bị Pull Request. AI không tự quyết nghiệp vụ hoặc thay thế review của
+thành viên. Xem [Quy trình phát triển UIT-FIXED có AI hỗ trợ](doc/AI_DEVELOPMENT_WORKFLOW.md)
+để biết các bước, checklist và prompt mẫu.
