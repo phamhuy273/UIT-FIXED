@@ -12,6 +12,7 @@ import { getIncidentsQueue, type IncidentQueueItem } from '../api/dispatch.api';
 import { ReviewModal } from './review-modal';
 import { DispatchModal } from './dispatch-modal';
 import { IncidentDetailModal } from './incident-detail-modal';
+import { GroupedPendingReports } from './grouped-pending-reports';
 import '@/features/incident-reports/incidents.css';
 
 function fmtDate(d: string | Date) {
@@ -37,6 +38,8 @@ export function PendingQueueTable() {
   const [page, setPage] = useState(1);
   const [incidentPage, setIncidentPage] = useState(1);
   const [selectedReport, setSelectedReport] = useState<IncidentReport | null>(null);
+  const [groupedView, setGroupedView] = useState(true);
+  const [initialRejectReason, setInitialRejectReason] = useState<string | undefined>();
   const [selectedIncidentForDispatch, setSelectedIncidentForDispatch] = useState<IncidentQueueItem | null>(null);
   const [selectedIncidentForDetail, setSelectedIncidentForDetail] = useState<IncidentQueueItem | null>(null);
 
@@ -78,7 +81,7 @@ export function PendingQueueTable() {
       />
 
       {/* Queue Selection Tabs */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+      <div className="queue-tabs" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
         <button
           type="button"
           className={`btn ${activeQueue === 'PENDING_REPORTS' ? 'btn--primary' : 'btn--secondary'}`}
@@ -190,6 +193,12 @@ export function PendingQueueTable() {
         {/* TAB 1: PENDING REPORTS */}
         {activeQueue === 'PENDING_REPORTS' && (
           <>
+            <div className="admin-group-modes" role="group" aria-label="Cách xem báo cáo">
+              <button type="button" className="btn btn--secondary" aria-pressed={groupedView} onClick={() => setGroupedView(true)}>Gom báo cáo tương tự</button>
+              <button type="button" className="btn btn--secondary" aria-pressed={!groupedView} onClick={() => setGroupedView(false)}>Danh sách thường</button>
+            </div>
+            {groupedView ? <GroupedPendingReports key={buildingId || 'all'} buildingId={buildingId ? Number(buildingId) : undefined}
+              onShowAll={() => setGroupedView(false)} onReview={(report, rejectReason) => { setInitialRejectReason(rejectReason); setSelectedReport(report); }} /> : <>
             {pendingReportsQuery.isPending && (
               <div className="skeleton" style={{ height: 240, margin: '20px 0', borderRadius: 'var(--radius-md)' }} />
             )}
@@ -259,7 +268,7 @@ export function PendingQueueTable() {
                           <button
                             type="button"
                             className="btn btn--secondary btn--sm"
-                            onClick={() => setSelectedReport(report)}
+                            onClick={() => { setInitialRejectReason(undefined); setSelectedReport(report); }}
                           >
                             Xem & duyệt
                           </button>
@@ -277,6 +286,7 @@ export function PendingQueueTable() {
               onChange={setPage}
               loading={pendingReportsQuery.isFetching}
             />
+            </>}
           </>
         )}
 
@@ -398,6 +408,7 @@ export function PendingQueueTable() {
         <ReviewModal
           key={selectedReport.id}
           report={selectedReport}
+          initialRejectReason={initialRejectReason}
           onClose={() => setSelectedReport(null)}
           onApproved={(approvedReport) => {
             setSelectedReport(null);

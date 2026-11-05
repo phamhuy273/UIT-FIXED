@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 export const reportInclude = {
+  _count: { select: { confirmations: true } },
   student: { select: { id: true, fullName: true, email: true } },
   category: { select: { id: true, name: true } },
   building: { select: { id: true, name: true, defaultDepartmentId: true } },
@@ -13,6 +14,7 @@ export const reportInclude = {
   incident: { select: { id: true, status: true, urgency: true } },
 } satisfies Prisma.IncidentReportInclude;
 
-export function presentReport<T extends { id: number; createdAt: Date }>(report: T) {
-  return { ...report, code: `IR-${report.createdAt.getUTCFullYear()}-${String(report.id).padStart(4, '0')}` };
+export function presentReport<T extends { id: number; createdAt: Date; _count?: { confirmations: number } }>(report: T) {
+  return { ...report, confirmationCount: report._count?.confirmations ?? 0,
+    code: `IR-${report.createdAt.getUTCFullYear()}-${String(report.id).padStart(4, '0')}` };
 }

@@ -2,6 +2,8 @@ export type Urgency = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
 export type ReportStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 export interface ReportMedia { id: number; url: string; publicId: string; }
 export interface IncidentReport {
+  observedAt?: string | null; recurrenceOfIncidentId?: number | null;
+  confirmationCount: number;
   id: number; code: string; title: string; description: string;
   status: ReportStatus; urgency: Urgency | null; createdAt: string; updatedAt: string;
   categoryId: number; buildingId: number; locationId: number;
@@ -14,6 +16,8 @@ export interface IncidentReport {
   incident: { id: number; status: 'PENDING_ASSIGNMENT' | 'ASSIGNED' | 'IN_PROGRESS' | 'RESOLVED'; urgency: Urgency } | null;
 }
 export interface CreateReportInput {
+  relativeToRepair?: 'BEFORE' | 'AFTER';
+  observedAt?: string; recurrenceOfIncidentId?: number;
   buildingId: number; locationId: number; categoryId: number;
   title: string; description: string; urgency?: Urgency; mediaIds: number[];
 }

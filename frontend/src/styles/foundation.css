@@ -394,6 +394,12 @@ h3 { font-size: 14px; font-weight: 600; line-height: 20px; }
   .topbar { padding: 0 16px; }
 }
 
+@media (max-width: 600px) {
+  .topbar__user, .topbar__divider { display: none; }
+  .topbar__right { gap: 8px; flex-shrink: 0; }
+  .breadcrumb > span { display: none; }
+}
+
 @media (min-width: 1024px) {
   .mobile-menu-toggle,
   .sidebar-close,

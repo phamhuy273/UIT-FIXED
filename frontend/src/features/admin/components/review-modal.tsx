@@ -12,17 +12,19 @@ export function ReviewModal({
   report,
   onClose,
   onApproved,
+  initialRejectReason,
 }: {
   report: IncidentReport;
   onClose: () => void;
   onApproved?: (approvedReport: IncidentReport) => void;
+  initialRejectReason?: string;
 }) {
   const categories = useCategories();
   const queryClient = useQueryClient();
   const [categoryId, setCategoryId] = useState(report.categoryId);
   const [urgency, setUrgency] = useState<Urgency | ''>(report.urgency ?? '');
-  const [rejecting, setRejecting] = useState(false);
-  const [reason, setReason] = useState('');
+  const [rejecting, setRejecting] = useState(Boolean(initialRejectReason));
+  const [reason, setReason] = useState(initialRejectReason ?? '');
   const [zoomed, setZoomed] = useState<number | null>(null);
 
   const mutation = useMutation({
@@ -99,6 +101,7 @@ export function ReviewModal({
       <div style={{ display: 'grid', gap: 14 }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <Badge kind="status" value={report.status} />
+          <span>{report.confirmationCount ?? 0} sinh viên xác nhận cùng gặp sự cố</span>
           {report.urgency && <Badge kind="urgency" value={report.urgency} />}
         </div>
 
